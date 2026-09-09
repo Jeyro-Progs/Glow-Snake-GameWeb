@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>JEY'SNAKE</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -16,7 +17,7 @@
     --green-glow: rgba(34, 197, 94, 0.55);
     --danger: #ef4444;
   }
-  * { box-sizing: border-box; }
+    * { box-sizing: border-box; }
   html, body {
     margin: 0;
     padding: 0;
@@ -551,13 +552,14 @@
 
   /* ===== Penyesuaian mode mobile ===== */
   body.mode-mobile canvas {
-    width: min(92vw, 400px) !important;
-    height: min(92vw, 400px) !important;
+    /* Mengisi layar ponsel tanpa menutupi HUD dan petunjuk swipe. */
+    width: min(96vw, calc(100dvh - 210px), 520px) !important;
+    height: min(96vw, calc(100dvh - 210px), 520px) !important;
   }
   body.mode-mobile .bestScorePanel {
     position: fixed !important;
     top: auto !important;
-    bottom: 100px;
+    bottom: max(92px, env(safe-area-inset-bottom));
     left: 50% !important;
     transform: translateX(-50%) !important;
     min-width: 0;
@@ -597,6 +599,16 @@
   body.mode-mobile #controlsHint { display: none !important; }
   body.mode-mobile #achievementToast { font-size: 15px; padding: 14px 26px; top: 110px; }
   body.mode-mobile .menuDivider { width: 70px; height: 4px; }
+
+  /* Layar landscape lebih pendek; pakai ruang vertikal yang tersedia. */
+  @media (max-width: 760px) and (orientation: landscape) {
+    body.mode-mobile canvas {
+      width: min(58vw, calc(100dvh - 44px), 440px) !important;
+      height: min(58vw, calc(100dvh - 44px), 440px) !important;
+    }
+    body.mode-mobile .bestScorePanel { bottom: 18px; }
+    body.mode-mobile #swipeHint { bottom: 14px; }
+  }
 </style>
 </head>
 <body>

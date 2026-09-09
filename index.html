@@ -16,6 +16,8 @@
     --green-light: #4ade80;
     --green-glow: rgba(34, 197, 94, 0.55);
     --danger: #ef4444;
+    --arena-border: rgba(34, 197, 94, 0.55);
+    --arena-glow: rgba(34, 197, 94, 0.14);
   }
     * { box-sizing: border-box; }
   html, body {
@@ -24,7 +26,7 @@
     height: 100%;
   }
   body {
-    background: var(--bg);
+    background: radial-gradient(circle at 50% 18%, #111d2e 0%, var(--bg) 48%, #070b13 100%);
     color: #fff;
     font-family: 'Poppins', 'Segoe UI', system-ui, Arial, sans-serif;
     min-height: 100vh;
@@ -39,6 +41,7 @@
     background: rgba(76, 175, 80, 0.06);
     pointer-events: none;
     z-index: 1;
+    filter: blur(3px);
   }
   .decorDot {
     position: absolute;
@@ -49,6 +52,7 @@
     opacity: 0.55;
     pointer-events: none;
     z-index: 1;
+    filter: blur(1px);
   }
   .floatParticle {
     position: fixed;
@@ -181,6 +185,11 @@
     to { left: 130%; }
   }
   #gameWrapper.shake { animation: shakeArena 0.4s ease; }
+  #gameWrapper.gameOverExit { animation: arenaGameOverExit 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  @keyframes arenaGameOverExit {
+    from { transform: translate(-50%, -50%) scale(1); opacity: 1; filter: blur(0); }
+    to { transform: translate(-50%, -50%) scale(0.94); opacity: 0; filter: blur(7px); }
+  }
   @keyframes shakeArena {
     0% { transform: translate(-50%, -50%); }
     10% { transform: translate(calc(-50% - 6px), calc(-50% + 3px)); }
@@ -196,9 +205,9 @@
   }
   canvas {
     background: #0a0f1a;
-    border: 2px solid rgba(34, 197, 94, 0.45);
+    border: 2px solid var(--arena-border);
     border-radius: 16px;
-    box-shadow: 0 0 40px rgba(34, 197, 94, 0.08), inset 0 0 60px rgba(0,0,0,0.4);
+    box-shadow: 0 0 40px var(--arena-glow), inset 0 0 60px rgba(0,0,0,0.4);
     display: block;
   }
 
@@ -249,6 +258,11 @@
     z-index: 30;
     padding: 20px;
     animation: viewFadeIn 0.25s ease-out;
+  }
+  #gameOverScreen.gameOverReveal { animation: gameOverReveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  @keyframes gameOverReveal {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   @keyframes viewFadeIn {
     from { opacity: 0; }
@@ -331,6 +345,8 @@
     opacity: 0.7;
   }
   .pillBtn {
+    position: relative;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -347,6 +363,16 @@
     transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, box-shadow 0.18s ease;
   }
   .pillBtn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.09); }
+  .pillBtn::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 -130%;
+    width: 60%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.55s ease;
+  }
+  .pillBtn:hover::after { left: 170%; }
   .pillBtn:active { transform: translateY(0) scale(0.98); }
   .pillBtn.primary {
     background: linear-gradient(135deg, var(--green-light), var(--green));
@@ -356,7 +382,8 @@
   }
   .pillBtn.primary:hover { box-shadow: 0 10px 28px rgba(34, 197, 94, 0.5); }
   .pillBtn.danger { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.35); color: #fca5a5; }
-  .menuIcon { width: 20px; height: 20px; flex: 0 0 20px; }
+  .menuIcon { width: 20px; height: 20px; flex: 0 0 20px; transition: transform 0.25s ease; }
+  .pillBtn:hover .menuIcon { transform: scale(1.12) rotate(-6deg); }
   .menuIcon path, .menuIcon rect, .menuIcon circle { stroke: currentColor; }
   body.menu-open .cornerPanel,
   body.menu-open .iconButtonsTopRight { display: none; }
@@ -400,13 +427,20 @@
     z-index: 50;
   }
   .modalCard {
-    background: var(--panel);
-    border: 1px solid var(--panel-border);
+    background: rgba(18, 26, 43, 0.82);
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 20px;
     padding: 30px 32px;
     width: 90%;
     max-width: 340px;
     text-align: center;
+    box-shadow: 0 20px 55px rgba(0,0,0,0.3);
+    backdrop-filter: blur(18px);
+    animation: modalLift 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes modalLift {
+    from { opacity: 0; transform: translateY(12px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
   .modalCard h3 { margin: 0 0 18px; font-size: 20px; letter-spacing: 0.05em; }
   .diffRow { display: flex; gap: 8px; justify-content: center; margin-bottom: 22px; }
@@ -424,6 +458,13 @@
   .diffBtn.active[data-diff="easy"] { background: var(--green); border-color: var(--green); color: #06210f; }
   .diffBtn.active[data-diff="normal"] { background: #ffb300; border-color: #ffb300; color: #1e1e2f; }
   .diffBtn.active[data-diff="hard"] { background: var(--danger); border-color: var(--danger); color: #fff; }
+  .featureIcon { width: 20px; height: 20px; flex: 0 0 20px; }
+  .featureIcon path, .featureIcon circle, .featureIcon rect { stroke: currentColor; }
+  .sectionLabel { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; text-align: left; margin: 0 0 8px; }
+  .sectionIcon { width: 18px; height: 18px; color: var(--green-light); }
+  .sectionIcon path, .sectionIcon circle, .sectionIcon rect { stroke: currentColor; }
+  .miniIcon { width: 16px; height: 16px; vertical-align: -3px; margin-right: 5px; }
+  .miniIcon path, .miniIcon rect { stroke: currentColor; }
 
   /* ===== Toggle suara ===== */
   .settingsRow {
@@ -467,6 +508,9 @@
     color: #ddd;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .deviceSwitchBtn.active {
     background: rgba(34,197,94,0.18);
@@ -519,7 +563,7 @@
     padding: 26px 16px;
     border-radius: 20px;
     border: 1px solid var(--panel-border);
-    background: rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.04);
     color: #fff;
     cursor: pointer;
     transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
@@ -528,6 +572,18 @@
     transform: translateY(-3px);
     background: rgba(34,197,94,0.1);
     border-color: rgba(34,197,94,0.4);
+  }
+  .deviceBtn { animation: deviceRise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .deviceBtn:nth-child(2) { animation-delay: 0.08s; }
+  .deviceBtn:hover .deviceIcon { transform: translateY(-3px) scale(1.08); }
+  .deviceIcon { transition: transform 0.25s ease; }
+  @keyframes deviceRise {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  #controlsHint, #swipeHint, .bestScorePanel {
+    background: rgba(18, 26, 43, 0.76);
+    backdrop-filter: blur(14px);
   }
   .deviceBtn .deviceIcon { width: 38px; height: 38px; color: var(--green-light); }
   .deviceBtn .deviceIcon svg { width: 100%; height: 100%; }
@@ -759,7 +815,7 @@
   <div class="leaderboardValue" id="finalScore">0</div>
   <p id="newRecordText" class="hidden" style="color:#ffd54f; font-weight:bold; margin-bottom:18px;">REKOR BARU!</p>
   <div class="menuButtons">
-    <button class="pillBtn primary" onclick="openPlayDifficulty()">Main Lagi</button>
+    <button class="pillBtn primary" onclick="startGame()">Main Lagi</button>
     <button class="pillBtn" onclick="showMainMenu()">Menu Utama</button>
   </div>
 </div>
@@ -769,9 +825,9 @@
   <div class="modalCard">
     <h3>PILIH DIFFICULTY</h3>
     <div class="menuButtons" style="max-width:100%;">
-      <button class="pillBtn primary" onclick="chooseDifficultyAndPlay('easy')">Easy</button>
-      <button class="pillBtn" style="background:linear-gradient(135deg,#ffd54f,#ffb300); border:none; color:#3a2a00;" onclick="chooseDifficultyAndPlay('normal')">Normal</button>
-      <button class="pillBtn" style="background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.4); color:#fca5a5;" onclick="chooseDifficultyAndPlay('hard')">Hard</button>
+      <button class="pillBtn primary" onclick="chooseDifficultyAndPlay('easy')"><svg class="featureIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke-width="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3m-2.9-7.1-2.1 2.1M6 18l-2.1 2.1m0-15.2L6 6.9m12 12 2.1 2.1" stroke-width="2" stroke-linecap="round"/></svg>Easy</button>
+      <button class="pillBtn" style="background:linear-gradient(135deg,#ffd54f,#ffb300); border:none; color:#3a2a00;" onclick="chooseDifficultyAndPlay('normal')"><svg class="featureIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v9l6 3" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="8.5" stroke-width="2"/></svg>Normal</button>
+      <button class="pillBtn" style="background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.4); color:#fca5a5;" onclick="chooseDifficultyAndPlay('hard')"><svg class="featureIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 4 19h16L12 3Z" stroke-width="2" stroke-linejoin="round"/><path d="M12 9v4m0 3h.01" stroke-width="2" stroke-linecap="round"/></svg>Hard</button>
     </div>
     <button class="pillBtn" style="margin-top:10px; background:transparent; border-color:transparent; color:var(--muted);" onclick="closePlayDifficulty()">Batal</button>
   </div>
@@ -787,17 +843,17 @@
       <div class="switchToggle" id="soundToggle" onclick="toggleSound()"><div class="knob"></div></div>
     </div>
 
-    <p style="color:var(--muted); font-size:13px; text-align:left; margin:0 0 8px;">Tingkat Kesulitan Default</p>
+    <p class="sectionLabel"><svg class="sectionIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19V10m7 9V5m7 14v-7M3 19h18" stroke-width="2" stroke-linecap="round"/></svg>Tingkat Kesulitan Default</p>
     <div class="diffRow">
       <button class="diffBtn" data-diff="easy" onclick="setDifficulty('easy')">Easy</button>
       <button class="diffBtn" data-diff="normal" onclick="setDifficulty('normal')">Normal</button>
       <button class="diffBtn" data-diff="hard" onclick="setDifficulty('hard')">Hard</button>
     </div>
 
-    <p style="color:var(--muted); font-size:13px; text-align:left; margin:0 0 8px;">Tipe Perangkat</p>
+    <p class="sectionLabel"><svg class="sectionIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="2" stroke-width="2"/><path d="M9 20h6m-3-4v4" stroke-width="2" stroke-linecap="round"/></svg>Tipe Perangkat</p>
     <div class="deviceSwitchRow" style="margin-bottom:22px;">
-      <button class="deviceSwitchBtn" id="deviceSwitchMobile" onclick="switchDeviceInline('mobile')">Mobile</button>
-      <button class="deviceSwitchBtn" id="deviceSwitchPc" onclick="switchDeviceInline('pc')">PC</button>
+      <button class="deviceSwitchBtn" id="deviceSwitchMobile" onclick="switchDeviceInline('mobile')"><svg class="miniIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2" stroke-width="1.8"/><path d="M10 18.5h4" stroke-width="1.8" stroke-linecap="round"/></svg>Mobile</button>
+      <button class="deviceSwitchBtn" id="deviceSwitchPc" onclick="switchDeviceInline('pc')"><svg class="miniIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" stroke-width="1.8"/><path d="M9 21h6m-3-5v5" stroke-width="1.8" stroke-linecap="round"/></svg>PC</button>
     </div>
 
     <button class="pillBtn" onclick="closeSettings()">Tutup</button>
@@ -877,6 +933,7 @@ let isPaused = false;
 let menuOpen = true;
 let countdownGen = 0;
 let countdownTimeoutId = null;
+let isCountdownActive = false;
 let swipeHintTimeoutId = null;
 let difficulty = "normal";
 let muted = false;
@@ -1015,7 +1072,7 @@ function checkMilestones() {
   for (const m of milestones) {
     if (score >= m && !achievedMilestones.has(m)) {
       achievedMilestones.add(m);
-      showAchievementToast("Milestone: skor " + m + " tercapai!");
+      showAchievementToast("Skor " + m + " tercapai!");
       break;
     }
   }
@@ -1045,6 +1102,14 @@ function updateAndDrawPopups(dt) {
 
 function setDifficulty(level) {
   difficulty = level;
+  const arenaThemes = {
+    easy: { border: "rgba(34, 197, 94, 0.7)", glow: "rgba(34, 197, 94, 0.18)" },
+    normal: { border: "rgba(255, 179, 0, 0.72)", glow: "rgba(255, 179, 0, 0.18)" },
+    hard: { border: "rgba(239, 68, 68, 0.72)", glow: "rgba(239, 68, 68, 0.2)" }
+  };
+  const theme = arenaThemes[level];
+  document.documentElement.style.setProperty("--arena-border", theme.border);
+  document.documentElement.style.setProperty("--arena-glow", theme.glow);
   document.querySelectorAll(".diffBtn").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.diff === level);
   });
@@ -1074,6 +1139,7 @@ function showMainMenu() {
   menuOpen = true;
   document.body.classList.add("menu-open");
   countdownGen++;
+  isCountdownActive = false;
   clearTimeout(countdownTimeoutId);
   clearTimeout(swipeHintTimeoutId);
   clearInterval(moveTimer);
@@ -1111,6 +1177,7 @@ function startGame() {
 
   const gameWrapperEl = document.getElementById("gameWrapper");
   gameWrapperEl.style.visibility = "visible";
+  gameWrapperEl.classList.remove("gameOverExit");
   gameWrapperEl.classList.remove("startPop");
   void gameWrapperEl.offsetWidth;
   gameWrapperEl.classList.add("startPop");
@@ -1179,6 +1246,7 @@ pauseBtn.addEventListener("click", () => {
 function runCountdown(callback) {
   const steps = ["3", "2", "1", "MULAI!"];
   clearTimeout(countdownTimeoutId);
+  isCountdownActive = true;
   const gen = ++countdownGen;
   let idx = 0;
 
@@ -1188,6 +1256,8 @@ function runCountdown(callback) {
     if (gen !== countdownGen) return;
     if (idx >= steps.length) {
       countdownOverlay.style.display = "none";
+      isCountdownActive = false;
+      foodSpawnTime = performance.now() - 250;
       callback();
       return;
     }
@@ -1514,7 +1584,7 @@ function renderLoop(now) {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   drawGrid();
 
-  if (food) drawFood(food.x, food.y, now);
+  if (food) drawFood(food.x, food.y, isCountdownActive ? foodSpawnTime + 250 : now);
   if (snake) {
     const t = (isPlaying && !isPaused) ? Math.min(1, (now - lastTickTime) / speedMap[difficulty]) : 1;
     drawSnake(t);
@@ -1561,10 +1631,17 @@ function endGame() {
 
 
   setTimeout(() => {
-    gameWrapperEl.style.visibility = "hidden";
-  }, 380);
+    gameWrapperEl.classList.remove("shake");
+    gameWrapperEl.classList.add("gameOverExit");
+    gameOverScreen.classList.remove("hidden");
+    gameOverScreen.classList.remove("gameOverReveal");
+    void gameOverScreen.offsetWidth;
+    gameOverScreen.classList.add("gameOverReveal");
+  }, 220);
 
-  gameOverScreen.classList.remove("hidden");
+  setTimeout(() => {
+    gameWrapperEl.style.visibility = "hidden";
+  }, 660);
 }
 </script>
 

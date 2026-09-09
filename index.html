@@ -80,6 +80,11 @@
     align-items: center;
     gap: 10px;
     z-index: 20;
+    animation: hudEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes hudEnter {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   .cornerPanel .icon { color: var(--green); flex-shrink: 0; }
   .cornerPanel .labelBlock { display: flex; flex-direction: column; line-height: 1.15; }
@@ -113,9 +118,10 @@
     justify-content: center;
     color: #fff;
     cursor: pointer;
-    transition: background 0.2s ease, transform 0.15s ease;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   }
-  .iconBtn:hover { background: rgba(255,255,255,0.14); transform: translateY(-1px); }
+  .iconBtn:hover { background: rgba(255,255,255,0.14); transform: translateY(-2px) scale(1.04); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+  .iconBtn:active { transform: scale(0.94); }
 
   .bestScorePanel {
     display: flex;
@@ -420,12 +426,19 @@
   .modalBackdrop {
     position: fixed;
     inset: 0;
-    background: rgba(4,6,12,0.7);
+    background: rgba(4,6,12,0.74);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 50;
+    backdrop-filter: blur(7px);
+    animation: backdropIn 0.28s ease-out both;
   }
+  @keyframes backdropIn { from { opacity: 0; } to { opacity: 1; } }
+  .modalBackdrop.modalClosing { animation: backdropOut 0.24s ease-in both; }
+  .modalBackdrop.modalClosing .modalCard { animation: modalOut 0.24s cubic-bezier(0.4, 0, 1, 1) both; }
+  @keyframes backdropOut { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes modalOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(10px) scale(0.96); } }
   .modalCard {
     background: rgba(18, 26, 43, 0.82);
     border: 1px solid rgba(255,255,255,0.1);
@@ -843,13 +856,6 @@
       <div class="switchToggle" id="soundToggle" onclick="toggleSound()"><div class="knob"></div></div>
     </div>
 
-    <p class="sectionLabel"><svg class="sectionIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19V10m7 9V5m7 14v-7M3 19h18" stroke-width="2" stroke-linecap="round"/></svg>Tingkat Kesulitan Default</p>
-    <div class="diffRow">
-      <button class="diffBtn" data-diff="easy" onclick="setDifficulty('easy')">Easy</button>
-      <button class="diffBtn" data-diff="normal" onclick="setDifficulty('normal')">Normal</button>
-      <button class="diffBtn" data-diff="hard" onclick="setDifficulty('hard')">Hard</button>
-    </div>
-
     <p class="sectionLabel"><svg class="sectionIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="2" stroke-width="2"/><path d="M9 20h6m-3-4v4" stroke-width="2" stroke-linecap="round"/></svg>Tipe Perangkat</p>
     <div class="deviceSwitchRow" style="margin-bottom:22px;">
       <button class="deviceSwitchBtn" id="deviceSwitchMobile" onclick="switchDeviceInline('mobile')"><svg class="miniIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2" stroke-width="1.8"/><path d="M10 18.5h4" stroke-width="1.8" stroke-linecap="round"/></svg>Mobile</button>
@@ -1024,39 +1030,51 @@ function syncDeviceSwitchUI() {
   document.getElementById("deviceSwitchPc").classList.toggle("active", deviceMode === "pc");
 }
 
+function openModal(modal) {
+  modal.classList.remove("modalClosing");
+  modal.classList.remove("hidden");
+}
+
+function closeModal(modal, onClosed) {
+  modal.classList.add("modalClosing");
+  setTimeout(() => {
+    modal.classList.add("hidden");
+    modal.classList.remove("modalClosing");
+    if (onClosed) onClosed();
+  }, 240);
+}
+
 // ===== Pilih kesulitan sebelum main =====
 function openPlayDifficulty() {
   hideFullScreens();
-  document.getElementById("playDifficultyModal").classList.remove("hidden");
+  openModal(document.getElementById("playDifficultyModal"));
 }
 function closePlayDifficulty() {
-  document.getElementById("playDifficultyModal").classList.add("hidden");
-  mainMenu.classList.remove("hidden");
+  closeModal(document.getElementById("playDifficultyModal"), () => mainMenu.classList.remove("hidden"));
 }
 function chooseDifficultyAndPlay(level) {
   setDifficulty(level);
-  document.getElementById("playDifficultyModal").classList.add("hidden");
-  startGame();
+  closeModal(document.getElementById("playDifficultyModal"), startGame);
 }
 
 // ===== Setting & Leaderboard =====
 function openSettings() {
-  settingsModal.classList.remove("hidden");
+  openModal(settingsModal);
   syncSoundToggleUI();
   syncDeviceSwitchUI();
   if (isPlaying) pauseGame();
 }
-function closeSettings() { settingsModal.classList.add("hidden"); }
+function closeSettings() { closeModal(settingsModal); }
 gearBtn.addEventListener("click", openSettings);
 
 function openLeaderboard() {
   leaderboardValueEl.innerText = highScore;
-  leaderboardModal.classList.remove("hidden");
+  openModal(leaderboardModal);
 }
-function closeLeaderboard() { leaderboardModal.classList.add("hidden"); }
+function closeLeaderboard() { closeModal(leaderboardModal); }
 
-function openCredits() { document.getElementById("creditsModal").classList.remove("hidden"); }
-function closeCredits() { document.getElementById("creditsModal").classList.add("hidden"); }
+function openCredits() { openModal(document.getElementById("creditsModal")); }
+function closeCredits() { closeModal(document.getElementById("creditsModal")); }
 
 // ===== toast pencapaian =====
 let toastTimeoutId = null;

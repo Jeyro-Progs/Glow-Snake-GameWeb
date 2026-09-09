@@ -307,12 +307,12 @@
   .menuCard {
     position: relative;
     z-index: 10;
-    background: rgba(18, 26, 43, 0.55);
-    border: 1px solid var(--panel-border);
+    background: transparent;
+    border: none;
     border-radius: 28px;
     padding: 48px 46px 40px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 0 60px rgba(34, 197, 94, 0.08), inset 0 0 40px rgba(255,255,255,0.02);
+    backdrop-filter: none;
+    box-shadow: none;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -356,6 +356,10 @@
   }
   .pillBtn.primary:hover { box-shadow: 0 10px 28px rgba(34, 197, 94, 0.5); }
   .pillBtn.danger { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.35); color: #fca5a5; }
+  .menuIcon { width: 20px; height: 20px; flex: 0 0 20px; }
+  .menuIcon path, .menuIcon rect, .menuIcon circle { stroke: currentColor; }
+  body.menu-open .cornerPanel,
+  body.menu-open .iconButtonsTopRight { display: none; }
 
   /* ===== Overlay ===== */
   .arenaOverlay {
@@ -585,7 +589,7 @@
   body.mode-mobile .bigTitle { font-size: 38px; letter-spacing: 0.1em; padding-left: 0.1em; }
   body.mode-mobile .bigSubtitle { font-size: 14px; margin-bottom: 30px; }
   body.mode-mobile .menuCard {
-    padding: 38px 26px 34px;
+    padding: 30px 26px 26px;
     width: 92vw;
     max-width: 420px;
   }
@@ -740,10 +744,10 @@
     <div class="menuDivider"></div>
     <div class="bigSubtitle">Eat <span class="dot">•</span> Grow <span class="dot">•</span> Get the High Score</div>
     <div class="menuButtons">
-      <button class="pillBtn primary" onclick="openPlayDifficulty()">Play</button>
-      <button class="pillBtn" onclick="openLeaderboard()">Leaderboard</button>
-      <button class="pillBtn" onclick="openSettings()">Settings</button>
-      <button class="pillBtn" onclick="openCredits()">Credit</button>
+      <button class="pillBtn primary" onclick="openPlayDifficulty()"><svg class="menuIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 6 8 6-8 6V6Z" fill="currentColor" stroke="none"/></svg>Play</button>
+      <button class="pillBtn" onclick="openLeaderboard()"><svg class="menuIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19V10m7 9V5m7 14v-7M3 19h18" stroke-width="2" stroke-linecap="round"/></svg>Leaderboard</button>
+      <button class="pillBtn" onclick="openSettings()"><svg class="menuIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke-width="2"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2-1.2L14.3 3h-4.1l-.4 2.6a7 7 0 0 0-2 1.2l-2.3-.9-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 2 1.2l.4 2.6h4.1l.4-2.6a7 7 0 0 0 2-1.2l2.3.9 2-3.4-2-1.5c.1-.4.1-.8.1-1.2Z" stroke-width="1.5" stroke-linejoin="round"/></svg>Settings</button>
+      <button class="pillBtn" onclick="openCredits()"><svg class="menuIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.2" stroke-width="2"/><path d="M5.5 20c.7-3.5 3-5.3 6.5-5.3s5.8 1.8 6.5 5.3" stroke-width="2" stroke-linecap="round"/></svg>Credit</button>
     </div>
   </div>
 </div>
@@ -895,12 +899,14 @@ function selectDevice(mode) {
   applyDeviceMode(mode);
   deviceSelect.classList.add("hidden");
   mainMenu.classList.remove("hidden");
+  document.body.classList.add("menu-open");
 }
 
 if (deviceMode) {
   applyDeviceMode(deviceMode);
   deviceSelect.classList.add("hidden");
   mainMenu.classList.remove("hidden");
+  document.body.classList.add("menu-open");
 }
 
 
@@ -1066,6 +1072,7 @@ function showMainMenu() {
   isPlaying = false;
   isPaused = false;
   menuOpen = true;
+  document.body.classList.add("menu-open");
   countdownGen++;
   clearTimeout(countdownTimeoutId);
   clearTimeout(swipeHintTimeoutId);
@@ -1087,6 +1094,7 @@ function startGame() {
   settingsModal.classList.add("hidden");
   hideFullScreens();
   menuOpen = false;
+  document.body.classList.remove("menu-open");
   bestScorePanel.classList.remove("hidden");
   pauseBtn.classList.remove("hidden");
   soundBtn.classList.add("hidden");

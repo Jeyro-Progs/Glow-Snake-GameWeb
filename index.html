@@ -153,9 +153,44 @@
   }
   #gameWrapper.startPop { animation: arenaStartPop 0.5s ease; }
   @keyframes arenaStartPop {
-    0% { transform: scale(0.85); opacity: 0.3; filter: brightness(1.8); }
-    60% { transform: scale(1.03); opacity: 1; }
-    100% { transform: scale(1); opacity: 1; filter: brightness(1); }
+    0% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.3; filter: brightness(1.8); }
+    60% { transform: translate(-50%, -50%) scale(1.03); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; filter: brightness(1); }
+  }
+  #arenaSweep {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 8;
+  }
+  #arenaSweep::after {
+    content: "";
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
+    transform: skewX(-20deg);
+  }
+  #arenaSweep.playSweep::after { animation: sweepMove 0.9s ease-out; }
+  @keyframes sweepMove {
+    from { left: -60%; }
+    to { left: 130%; }
+  }
+  #gameWrapper.shake { animation: shakeArena 0.4s ease; }
+  @keyframes shakeArena {
+    0% { transform: translate(-50%, -50%); }
+    10% { transform: translate(calc(-50% - 6px), calc(-50% + 3px)); }
+    20% { transform: translate(calc(-50% + 5px), calc(-50% - 4px)); }
+    30% { transform: translate(calc(-50% - 4px), calc(-50% + 4px)); }
+    40% { transform: translate(calc(-50% + 6px), calc(-50% + 2px)); }
+    50% { transform: translate(calc(-50% - 5px), calc(-50% - 3px)); }
+    60% { transform: translate(calc(-50% + 4px), calc(-50% + 3px)); }
+    70% { transform: translate(calc(-50% - 3px), calc(-50% - 2px)); }
+    80% { transform: translate(calc(-50% + 2px), calc(-50% + 2px)); }
+    90% { transform: translate(calc(-50% - 1px), calc(-50% - 1px)); }
+    100% { transform: translate(-50%, -50%); }
   }
   canvas {
     background: #0a0f1a;
@@ -382,6 +417,55 @@
   .diffBtn.active[data-diff="easy"] { background: var(--green); border-color: var(--green); color: #06210f; }
   .diffBtn.active[data-diff="normal"] { background: #ffb300; border-color: #ffb300; color: #1e1e2f; }
   .diffBtn.active[data-diff="hard"] { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+  /* ===== Toggle suara & pilihan device di Settings ===== */
+  .settingsRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding: 4px 2px;
+  }
+  .settingsRowLabel { font-size: 14px; color: #eee; text-align: left; }
+  .switchToggle {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid var(--panel-border);
+    cursor: pointer;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+  }
+  .switchToggle.on { background: var(--green); border-color: var(--green); }
+  .switchToggle .knob {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s ease;
+  }
+  .switchToggle.on .knob { transform: translateX(22px); }
+  .deviceSwitchRow { display: flex; gap: 8px; }
+  .deviceSwitchBtn {
+    flex: 1;
+    padding: 9px 10px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid var(--panel-border);
+    background: rgba(255,255,255,0.05);
+    color: #ddd;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .deviceSwitchBtn.active {
+    background: rgba(34,197,94,0.18);
+    border-color: var(--green);
+    color: var(--green-light);
+  }
   .leaderboardValue {
     font-size: 40px;
     font-weight: 800;
@@ -467,29 +551,52 @@
 
   /* ===== Penyesuaian mode mobile ===== */
   body.mode-mobile canvas {
-    width: min(88vw, 360px) !important;
-    height: min(88vw, 360px) !important;
+    width: min(92vw, 400px) !important;
+    height: min(92vw, 400px) !important;
   }
   body.mode-mobile .bestScorePanel {
     position: fixed !important;
     top: auto !important;
-    bottom: 96px;
+    bottom: 100px;
     left: 50% !important;
     transform: translateX(-50%) !important;
     min-width: 0;
-    padding: 8px 18px;
+    padding: 10px 22px;
     flex-direction: row;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    font-size: 15px;
   }
-  body.mode-mobile .bestScorePanel .value { font-size: 16px; margin-top: 0; }
-  body.mode-mobile .cornerPanel { top: 14px; left: 14px; }
-  body.mode-mobile .cornerPanel .value { font-size: 18px; }
-  body.mode-mobile .iconButtonsTopRight { top: 14px; right: 14px; }
-  body.mode-mobile .iconBtn { width: 38px; height: 38px; }
-  body.mode-mobile .bigTitle { font-size: 36px; }
-  body.mode-mobile .menuCard { padding: 34px 24px 30px; }
+  body.mode-mobile .bestScorePanel .value { font-size: 20px; margin-top: 0; }
+  body.mode-mobile .bestScorePanel .label { font-size: 14px; }
+  body.mode-mobile .cornerPanel { top: 18px; left: 18px; gap: 8px; }
+  body.mode-mobile .cornerPanel .icon { width: 24px; height: 20px; }
+  body.mode-mobile .cornerPanel .label { font-size: 13px; }
+  body.mode-mobile .cornerPanel .value { font-size: 22px; }
+  body.mode-mobile .iconButtonsTopRight { top: 18px; right: 18px; gap: 12px; }
+  body.mode-mobile .iconBtn { width: 46px; height: 46px; }
+  body.mode-mobile .iconBtn svg { width: 20px; height: 20px; }
+  body.mode-mobile .logoWrap svg { width: 110px; height: 94px; }
+  body.mode-mobile .bigTitle { font-size: 38px; letter-spacing: 0.1em; padding-left: 0.1em; }
+  body.mode-mobile .bigSubtitle { font-size: 14px; margin-bottom: 30px; }
+  body.mode-mobile .menuCard {
+    padding: 38px 26px 34px;
+    width: 92vw;
+    max-width: 420px;
+  }
+  body.mode-mobile .menuButtons { max-width: 100%; gap: 16px; }
+  body.mode-mobile .pillBtn { padding: 19px 22px; font-size: 17px; border-radius: 26px; }
+  body.mode-mobile .modalCard { width: 92vw; padding: 34px 26px; }
+  body.mode-mobile .modalCard h3 { font-size: 22px; }
+  body.mode-mobile .diffBtn { padding: 12px 20px; font-size: 15px; }
+  body.mode-mobile .deviceBtn { padding: 30px 18px; }
+  body.mode-mobile .deviceBtn .deviceIcon { font-size: 40px; }
+  body.mode-mobile .deviceBtn .deviceLabel { font-size: 17px; }
+  body.mode-mobile .deviceBtn .deviceDesc { font-size: 13px; }
+  body.mode-mobile #swipeHint { font-size: 14px; padding: 14px 22px; bottom: 26px; }
   body.mode-mobile #controlsHint { display: none !important; }
+  body.mode-mobile #achievementToast { font-size: 15px; padding: 14px 26px; top: 110px; }
+  body.mode-mobile .menuDivider { width: 70px; height: 4px; }
 </style>
 </head>
 <body>
@@ -533,6 +640,7 @@
 <div class="stageRow">
   <div id="gameWrapper">
     <canvas id="gameCanvas" width="440" height="440"></canvas>
+    <div id="arenaSweep"></div>
 
     <!-- Overlay hitung mundur -->
     <div id="countdownOverlay" class="arenaOverlay" style="display:none;">
@@ -578,7 +686,7 @@
 <!-- Pilihan Perangkat -->
 <div id="deviceSelect" class="fullScreenView">
   <div class="menuCard">
-    <h1 class="bigTitle" style="font-size:34px;">PILIH PERANGKAT</h1>
+    <h1 class="bigTitle" style="font-size:34px;">Pilih Device</h1>
     <div class="menuDivider"></div>
     <div class="bigSubtitle" style="margin-bottom:26px;">Sesuaikan kontrol &amp; tampilan game</div>
     <div class="deviceChoiceRow">
@@ -622,8 +730,8 @@
     <div class="menuDivider"></div>
     <div class="bigSubtitle">Eat <span class="dot">•</span> Grow <span class="dot">•</span> Get the High Score</div>
     <div class="menuButtons">
-      <button class="pillBtn primary" onclick="startGame()">▶ &nbsp;Play</button>
-      <button class="pillBtn" onclick="openLeaderboard()">📊 &nbsp;TopScore</button>
+      <button class="pillBtn primary" onclick="openPlayDifficulty()">▶ &nbsp;Play</button>
+      <button class="pillBtn" onclick="openLeaderboard()">📊 &nbsp;Leaderboard</button>
       <button class="pillBtn" onclick="openSettings()">⚙️ &nbsp;Settings</button>
       <button class="pillBtn" onclick="openCredits()">👤 &nbsp;Credit</button>
     </div>
@@ -633,12 +741,25 @@
 <!-- Layar Game Over -->
 <div id="gameOverScreen" class="fullScreenView hidden">
   <h1 class="bigTitle" style="font-size:42px; color:#ff6b6b;">GAME OVER</h1>
-  <p style="color:var(--muted); margin-bottom:4px;">Skor Kamu</p>
+  <p style="color:var(--muted); margin-bottom:4px;">Skor</p>
   <div class="leaderboardValue" id="finalScore">0</div>
   <p id="newRecordText" class="hidden" style="color:#ffd54f; font-weight:bold; margin-bottom:18px;">🎉 Rekor Baru!</p>
   <div class="menuButtons">
-    <button class="pillBtn primary" onclick="startGame()">🔄 &nbsp;Main Lagi</button>
+    <button class="pillBtn primary" onclick="openPlayDifficulty()">🔄 &nbsp;Main Lagi</button>
     <button class="pillBtn" onclick="showMainMenu()">☰ &nbsp;Menu Utama</button>
+  </div>
+</div>
+
+<!-- Modal Pilih Kesulitan (muncul tiap tekan Play) -->
+<div id="playDifficultyModal" class="modalBackdrop hidden">
+  <div class="modalCard">
+    <h3>PILIH DIFFICULTY</h3>
+    <div class="menuButtons" style="max-width:100%;">
+      <button class="pillBtn primary" onclick="chooseDifficultyAndPlay('easy')">🟢 &nbsp;Easy</button>
+      <button class="pillBtn" style="background:linear-gradient(135deg,#ffd54f,#ffb300); border:none; color:#3a2a00;" onclick="chooseDifficultyAndPlay('normal')">🟡 &nbsp;Normal</button>
+      <button class="pillBtn" style="background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.4); color:#fca5a5;" onclick="chooseDifficultyAndPlay('hard')">🔴 &nbsp;Hard</button>
+    </div>
+    <button class="pillBtn" style="margin-top:10px; background:transparent; border-color:transparent; color:var(--muted);" onclick="closePlayDifficulty()">Batal</button>
   </div>
 </div>
 
@@ -646,14 +767,26 @@
 <div id="settingsModal" class="modalBackdrop hidden">
   <div class="modalCard">
     <h3>PENGATURAN</h3>
-    <p style="color:var(--muted); font-size:13px; margin-top:-10px; margin-bottom:14px;">Tingkat Kesulitan</p>
+
+    <div class="settingsRow">
+      <span class="settingsRowLabel">🔊 Suara</span>
+      <div class="switchToggle" id="soundToggle" onclick="toggleSound()"><div class="knob"></div></div>
+    </div>
+
+    <p style="color:var(--muted); font-size:13px; text-align:left; margin:0 0 8px;">Tingkat Kesulitan Default</p>
     <div class="diffRow">
       <button class="diffBtn" data-diff="easy" onclick="setDifficulty('easy')">Easy</button>
       <button class="diffBtn" data-diff="normal" onclick="setDifficulty('normal')">Normal</button>
       <button class="diffBtn" data-diff="hard" onclick="setDifficulty('hard')">Hard</button>
     </div>
+
+    <p style="color:var(--muted); font-size:13px; text-align:left; margin:0 0 8px;">Tipe Perangkat</p>
+    <div class="deviceSwitchRow" style="margin-bottom:22px;">
+      <button class="deviceSwitchBtn" id="deviceSwitchMobile" onclick="switchDeviceInline('mobile')">📱 Mobile</button>
+      <button class="deviceSwitchBtn" id="deviceSwitchPc" onclick="switchDeviceInline('pc')">🖥️ PC</button>
+    </div>
+
     <button class="pillBtn" onclick="closeSettings()">Tutup</button>
-    <button class="pillBtn" style="margin-top:8px; font-size:13px; background:transparent; border-color:transparent; color:var(--muted);" onclick="changeDeviceMode()">🔁 Ganti Mode Perangkat</button>
   </div>
 </div>
 
@@ -676,7 +809,7 @@
     <p style="color:var(--muted); font-size:13px; line-height:1.6; margin:0 0 4px;">Murid SMPN 7 Tambun Selatan</p>
     <p style="color:var(--muted); font-size:13px; line-height:1.6; margin:0 0 18px;">Semi-Profesional Software Engineer</p>
     <div class="menuDivider" style="margin:0 auto 16px;"></div>
-    <p style="color:var(--muted); font-size:12px; line-height:1.6; margin:0 0 20px;">Dibuat dengan ❤️ menggunakan HTML, CSS &amp; JavaScript.<br>Terima kasih sudah bermain JEY'SNAKE!</p>
+    <p style="color:var(--muted); font-size:12px; line-height:1.6; margin:0 0 20px;">Dibuat menggunakan HTML, CSS &amp; JavaScript.<br>thanks For playing!</p>
     <button class="pillBtn" onclick="closeCredits()">Tutup</button>
   </div>
 </div>
@@ -754,15 +887,6 @@ function selectDevice(mode) {
   mainMenu.classList.remove("hidden");
 }
 
-function changeDeviceMode() {
-  closeSettings();
-  if (isPlaying) showMainMenu();
-  localStorage.removeItem("jeysnakeDevice");
-  deviceMode = null;
-  mainMenu.classList.add("hidden");
-  deviceSelect.classList.remove("hidden");
-}
-
 if (deviceMode) {
   applyDeviceMode(deviceMode);
   deviceSelect.classList.add("hidden");
@@ -793,11 +917,61 @@ soundBtn.addEventListener("click", () => {
   muted = !muted;
   soundIconOn.classList.toggle("hidden", muted);
   soundIconOff.classList.toggle("hidden", !muted);
+  syncSoundToggleUI();
 });
+
+function toggleSound() {
+  muted = !muted;
+  soundIconOn.classList.toggle("hidden", muted);
+  soundIconOff.classList.toggle("hidden", !muted);
+  syncSoundToggleUI();
+}
+
+function syncSoundToggleUI() {
+  document.getElementById("soundToggle").classList.toggle("on", !muted);
+}
+
+function switchDeviceInline(mode) {
+  localStorage.setItem("jeysnakeDevice", mode);
+  applyDeviceMode(mode);
+  syncDeviceSwitchUI();
+  // sesuaikan kontrol yang tampil kalau sedang bermain
+  if (isPlaying || isPaused) {
+    if (mode === "mobile") {
+      swipeHint.classList.remove("hidden");
+      controlsHint.classList.add("hidden");
+    } else {
+      controlsHint.classList.remove("hidden");
+      swipeHint.classList.add("hidden");
+    }
+  }
+}
+
+function syncDeviceSwitchUI() {
+  document.getElementById("deviceSwitchMobile").classList.toggle("active", deviceMode === "mobile");
+  document.getElementById("deviceSwitchPc").classList.toggle("active", deviceMode === "pc");
+}
+
+// ===== Pilih kesulitan sebelum main (dipicu tombol Play) =====
+function openPlayDifficulty() {
+  hideFullScreens();
+  document.getElementById("playDifficultyModal").classList.remove("hidden");
+}
+function closePlayDifficulty() {
+  document.getElementById("playDifficultyModal").classList.add("hidden");
+  mainMenu.classList.remove("hidden");
+}
+function chooseDifficultyAndPlay(level) {
+  setDifficulty(level);
+  document.getElementById("playDifficultyModal").classList.add("hidden");
+  startGame();
+}
 
 // ===== Setting & Leaderboard modal =====
 function openSettings() {
   settingsModal.classList.remove("hidden");
+  syncSoundToggleUI();
+  syncDeviceSwitchUI();
   if (isPlaying) pauseGame();
 }
 function closeSettings() { settingsModal.classList.add("hidden"); }
@@ -923,6 +1097,11 @@ function startGame() {
   void gameWrapperEl.offsetWidth;
   gameWrapperEl.classList.add("startPop");
 
+  const sweepEl = document.getElementById("arenaSweep");
+  sweepEl.classList.remove("playSweep");
+  void sweepEl.offsetWidth;
+  sweepEl.classList.add("playSweep");
+
   snake = [{ x: 9 * box, y: 9 * box }];
   prevSnake = [{ x: 9 * box, y: 9 * box }];
   direction = null;
@@ -1041,8 +1220,10 @@ function changeDirection(event) {
   else if ((key === "ArrowDown" || key === "s")) trySetDirection("DOWN");
 }
 
-// Kontrol swipe (mode mobile)
+// Kontrol swipe (mode mobile) — deteksi kontinu biar responsif seperti joystick
 let touchStartX = 0, touchStartY = 0;
+const SWIPE_THRESHOLD = 18; // makin kecil = makin sensitif/responsif
+
 document.addEventListener("touchstart", (e) => {
   if (deviceMode !== "mobile" || !isPlaying || isPaused) return;
   const t = e.touches[0];
@@ -1051,21 +1232,23 @@ document.addEventListener("touchstart", (e) => {
 }, { passive: true });
 
 document.addEventListener("touchmove", (e) => {
-  if (deviceMode === "mobile" && isPlaying && !isPaused) e.preventDefault();
-}, { passive: false });
-
-document.addEventListener("touchend", (e) => {
   if (deviceMode !== "mobile" || !isPlaying || isPaused) return;
-  const t = e.changedTouches[0];
+  e.preventDefault();
+  const t = e.touches[0];
   const dx = t.clientX - touchStartX;
   const dy = t.clientY - touchStartY;
-  if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return; // abaikan ketukan kecil
+
+  if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_THRESHOLD) return;
+
   if (Math.abs(dx) > Math.abs(dy)) {
     trySetDirection(dx > 0 ? "RIGHT" : "LEFT");
   } else {
     trySetDirection(dy > 0 ? "DOWN" : "UP");
   }
-}, { passive: true });
+  // reset titik acuan supaya bisa langsung geser lagi ke arah lain tanpa angkat jari
+  touchStartX = t.clientX;
+  touchStartY = t.clientY;
+}, { passive: false });
 
 function tick() {
   if (!direction) {
@@ -1166,10 +1349,15 @@ function roundedRect(x, y, w, h, r) {
 }
 
 function drawFood(x, y, t) {
+  // Animasi "tumbuh" saat makanan baru muncul (200ms pertama)
+  const spawnElapsed = t - foodSpawnTime;
+  const spawnGrow = Math.min(1, spawnElapsed / 200);
+  const spawnScale = spawnGrow < 1 ? (0.2 + 0.8 * (1 - Math.pow(1 - spawnGrow, 3))) : 1;
+
   if (foodType === "golden") {
     const remaining = Math.max(0, 1 - (t - foodSpawnTime) / foodLifespan);
     const pulse = 1 + Math.sin(t / 140) * 0.12;
-    const size = (box - 6) * pulse * (0.7 + remaining * 0.3);
+    const size = (box - 6) * pulse * (0.7 + remaining * 0.3) * spawnScale;
     const offset = (box - size) / 2;
     const cx = x + box / 2;
     const cy = y + box / 2;
@@ -1192,7 +1380,7 @@ function drawFood(x, y, t) {
   }
 
   const pulse = 1 + Math.sin(t / 260) * 0.08;
-  const size = (box - 6) * pulse;
+  const size = (box - 6) * pulse * spawnScale;
   const offset = (box - size) / 2;
 
   ctx.save();
@@ -1323,6 +1511,11 @@ function endGame() {
   clearInterval(moveTimer);
   beep(160, 0.35, "sawtooth");
 
+  const gameWrapperEl = document.getElementById("gameWrapper");
+  gameWrapperEl.classList.remove("shake");
+  void gameWrapperEl.offsetWidth;
+  gameWrapperEl.classList.add("shake");
+
   let isNewRecord = false;
   if (score > highScore) {
     highScore = score;
@@ -1340,8 +1533,13 @@ function endGame() {
   pauseBtn.classList.add("hidden");
   soundBtn.classList.remove("hidden");
   menuOpen = true; // supaya arena kosong lagi di belakang layar game over
-  document.getElementById("gameWrapper").style.visibility = "hidden";
   updateScoreDisplays();
+
+  // beri jeda sebentar biar animasi shake sempat kelihatan sebelum arena disembunyikan
+  setTimeout(() => {
+    gameWrapperEl.style.visibility = "hidden";
+  }, 380);
+
   gameOverScreen.classList.remove("hidden");
 }
 </script>

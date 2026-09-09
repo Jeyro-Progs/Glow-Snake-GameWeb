@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>JEY'SNAKE</title>
+<title>Glow'Snake</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0b0f19;
@@ -67,7 +67,7 @@
     100% { transform: translateY(-100vh) rotate(25deg); opacity: 0; }
   }
 
-  /* Panel pojok (Score / High Score)  */
+  /* ===== Panel pojok (Score / High Score) ===== */
   .cornerPanel {
     position: fixed;
     top: 28px;
@@ -132,7 +132,7 @@
   .bestScorePanel .label { display:flex; align-items:center; gap:8px; color: var(--muted); font-size: 13px; }
   .bestScorePanel .value { font-size: 24px; font-weight: 700; margin-top: 4px; }
 
-  /* Layout permainan */
+  /* ===== Layout gameplay ===== */
   .stageRow {
     height: 100vh;
     position: relative;
@@ -202,7 +202,7 @@
     display: block;
   }
 
-  /* Kotak panduan kontrol  */
+  /* ===== Kotak kontrol ===== */
   #controlsHint {
     position: fixed;
     left: 32px;
@@ -237,7 +237,7 @@
   .dpad .right { grid-column: 3; grid-row: 2; }
   #controlsHint .hintText { font-size: 13px; color: var(--muted); line-height: 1.4; }
 
-  /* Layar penuh */
+  /* ===== Layar penuh ===== */
   .fullScreenView {
     position: fixed;
     inset: 0;
@@ -268,6 +268,7 @@
   }
 
   .bigTitle {
+    font-family: 'Space Grotesk', 'Poppins', sans-serif;
     font-size: 50px;
     font-weight: 800;
     letter-spacing: 0.16em;
@@ -356,7 +357,7 @@
   .pillBtn.primary:hover { box-shadow: 0 10px 28px rgba(34, 197, 94, 0.5); }
   .pillBtn.danger { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.35); color: #fca5a5; }
 
-  /* ===== Overlay di dalam gameplay (countdown & pause) ===== */
+  /* ===== Overlay ===== */
   .arenaOverlay {
     position: absolute;
     inset: 0;
@@ -384,7 +385,7 @@
     100% { transform: scale(1); opacity: 1; }
   }
 
-  /* ===== Model (settings & leaderboard) ===== */
+  /* =====(settings & leaderboard) ===== */
   .modalBackdrop {
     position: fixed;
     inset: 0;
@@ -420,7 +421,7 @@
   .diffBtn.active[data-diff="normal"] { background: #ffb300; border-color: #ffb300; color: #1e1e2f; }
   .diffBtn.active[data-diff="hard"] { background: var(--danger); border-color: var(--danger); color: #fff; }
 
-  /* Toggle suara & pilihan device di Settings */
+  /* ===== Toggle suara ===== */
   .settingsRow {
     display: flex;
     align-items: center;
@@ -524,7 +525,8 @@
     background: rgba(34,197,94,0.1);
     border-color: rgba(34,197,94,0.4);
   }
-  .deviceBtn .deviceIcon { font-size: 34px; }
+  .deviceBtn .deviceIcon { width: 38px; height: 38px; color: var(--green-light); }
+  .deviceBtn .deviceIcon svg { width: 100%; height: 100%; }
   .deviceBtn .deviceLabel { font-weight: 700; font-size: 15px; }
   .deviceBtn .deviceDesc { font-size: 12px; color: var(--muted); }
 
@@ -545,7 +547,8 @@
     color: var(--muted);
     font-size: 13px;
   }
-  #swipeHint .swipeIcon { font-size: 20px; animation: swipeMove 1.6s ease-in-out infinite; }
+  #swipeHint .swipeIcon { width: 24px; height: 24px; display: inline-flex; animation: swipeMove 1.6s ease-in-out infinite; }
+  #swipeHint .swipeIcon svg { width: 100%; height: 100%; stroke: var(--green-light); }
   @keyframes swipeMove {
     0%, 100% { transform: translateX(-6px); opacity: 0.6; }
     50% { transform: translateX(6px); opacity: 1; }
@@ -553,13 +556,11 @@
 
   /* ===== Penyesuaian mode mobile ===== */
   body.mode-mobile canvas {
-    /* Mengisi layar ponsel tanpa menutupi HUD dan petunjuk swipe. */
     width: min(96vw, calc(100dvh - 210px), 520px) !important;
     height: min(96vw, calc(100dvh - 210px), 520px) !important;
   }
   body.mode-mobile .bestScorePanel {
     position: fixed !important;
-    /* Di atas arena: mudah terbaca dan tidak mengganggu area permainan. */
     top: max(82px, env(safe-area-inset-top)) !important;
     bottom: auto;
     left: 50% !important;
@@ -594,7 +595,7 @@
   body.mode-mobile .modalCard h3 { font-size: 22px; }
   body.mode-mobile .diffBtn { padding: 12px 20px; font-size: 15px; }
   body.mode-mobile .deviceBtn { padding: 30px 18px; }
-  body.mode-mobile .deviceBtn .deviceIcon { font-size: 40px; }
+  body.mode-mobile .deviceBtn .deviceIcon { width: 44px; height: 44px; }
   body.mode-mobile .deviceBtn .deviceLabel { font-size: 17px; }
   body.mode-mobile .deviceBtn .deviceDesc { font-size: 13px; }
   body.mode-mobile #swipeHint { font-size: 14px; padding: 14px 22px; bottom: 26px; }
@@ -602,7 +603,6 @@
   body.mode-mobile #achievementToast { font-size: 15px; padding: 14px 26px; top: 110px; }
   body.mode-mobile .menuDivider { width: 70px; height: 4px; }
 
-  /* Layar landscape lebih pendek; pakai ruang vertikal yang tersedia. */
   @media (max-width: 760px) and (orientation: landscape) {
     body.mode-mobile canvas {
       width: min(58vw, calc(100dvh - 44px), 440px) !important;
@@ -650,7 +650,7 @@
   </button>
 </div>
 
-<!-- Panggung permainan -->
+<!-- Panggung game -->
 <div class="stageRow">
   <div id="gameWrapper">
     <canvas id="gameCanvas" width="440" height="440"></canvas>
@@ -680,7 +680,7 @@
   </div>
 </div>
 
-<!-- Kotak panduan kontrol (PC) -->
+<!-- Kotak kontrol (PC) -->
 <div id="controlsHint" class="hidden">
   <div class="dpad">
     <div class="key up">↑</div>
@@ -693,7 +693,7 @@
 
 <!-- Indikator swipe (Mobile) -->
 <div id="swipeHint" class="hidden">
-  <span class="swipeIcon">👉</span>
+      <span class="swipeIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12h15M14 6l6 6-6 6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
   <span>Geser layar untuk mengarahkan ular</span>
 </div>
 
@@ -705,12 +705,12 @@
     <div class="bigSubtitle" style="margin-bottom:26px;">Sesuaikan kontrol &amp; tampilan game</div>
     <div class="deviceChoiceRow">
       <button class="deviceBtn" onclick="selectDevice('mobile')">
-        <span class="deviceIcon">📱</span>
+        <span class="deviceIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="6.5" y="2.5" width="11" height="19" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M10 18.5h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
         <span class="deviceLabel">Mobile</span>
         <span class="deviceDesc">Geser layar</span>
       </button>
       <button class="deviceBtn" onclick="selectDevice('pc')">
-        <span class="deviceIcon">🖥️</span>
+        <span class="deviceIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M9 21h6m-3-5v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
         <span class="deviceLabel">PC</span>
         <span class="deviceDesc">Keyboard</span>
       </button>
@@ -720,18 +720,14 @@
 
 <!-- Menu Utama -->
 <div id="mainMenu" class="fullScreenView hidden">
-  <span class="floatParticle" style="left:6%; animation-duration:9s; animation-delay:0s;">🍏</span>
-  <span class="floatParticle" style="left:14%; animation-duration:11s; animation-delay:2s;">✨</span>
-  <span class="floatParticle" style="left:88%; animation-duration:10s; animation-delay:1s;">🍏</span>
-  <span class="floatParticle" style="left:92%; animation-duration:12s; animation-delay:3.5s;">✨</span>
-  <span class="floatParticle" style="left:8%; animation-duration:9.5s; animation-delay:5s;">🍏</span>
 
   <div class="menuCard">
     <div class="logoWrap">
-      <svg width="130" height="110" viewBox="0 0 130 110" fill="none">
-        <path d="M20 60c15 0 15-35 35-35s15 35 35 35 15-30 30-15" stroke="url(#g)" stroke-width="14" stroke-linecap="round" fill="none"/>
-        <circle cx="118" cy="47" r="4" fill="#06210f"/>
-        <path d="M124 45c4-2 8-1 10 1" stroke="var(--green-light)" stroke-width="3" stroke-linecap="round" fill="none"/>
+      <svg width="130" height="110" viewBox="0 0 130 110" fill="none" role="img" aria-label="Logo ular">
+        <path d="M18 69c0-22 17-38 38-38 18 0 31 12 31 27 0 12-9 20-20 20-9 0-16-6-16-15 0-7 5-12 12-12 5 0 9 3 10 7" stroke="url(#g)" stroke-width="13" stroke-linecap="round"/>
+        <path d="M87 58c7-15 20-21 31-13 9 7 5 21-6 23-7 2-13-2-14-8" stroke="url(#g)" stroke-width="13" stroke-linecap="round"/>
+        <circle cx="111" cy="53" r="2.8" fill="#06210f"/>
+        <path d="M117 62l7 3" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round"/>
         <defs>
           <linearGradient id="g" x1="0" y1="0" x2="130" y2="0">
             <stop offset="0%" stop-color="#4ade80"/>
@@ -740,14 +736,14 @@
         </defs>
       </svg>
     </div>
-    <h1 class="bigTitle">JEY'SNAKE</h1>
+    <h1 class="bigTitle">Glow'Snake</h1>
     <div class="menuDivider"></div>
     <div class="bigSubtitle">Eat <span class="dot">•</span> Grow <span class="dot">•</span> Get the High Score</div>
     <div class="menuButtons">
-      <button class="pillBtn primary" onclick="openPlayDifficulty()">▶ &nbsp;Play</button>
-      <button class="pillBtn" onclick="openLeaderboard()">📊 &nbsp;Leaderboard</button>
-      <button class="pillBtn" onclick="openSettings()">⚙️ &nbsp;Settings</button>
-      <button class="pillBtn" onclick="openCredits()">👤 &nbsp;Credit</button>
+      <button class="pillBtn primary" onclick="openPlayDifficulty()">Play</button>
+      <button class="pillBtn" onclick="openLeaderboard()">Leaderboard</button>
+      <button class="pillBtn" onclick="openSettings()">Settings</button>
+      <button class="pillBtn" onclick="openCredits()">Credit</button>
     </div>
   </div>
 </div>
@@ -757,33 +753,33 @@
   <h1 class="bigTitle" style="font-size:42px; color:#ff6b6b;">GAME OVER</h1>
   <p style="color:var(--muted); margin-bottom:4px;">Skor</p>
   <div class="leaderboardValue" id="finalScore">0</div>
-  <p id="newRecordText" class="hidden" style="color:#ffd54f; font-weight:bold; margin-bottom:18px;">🎉 Rekor Baru!</p>
+  <p id="newRecordText" class="hidden" style="color:#ffd54f; font-weight:bold; margin-bottom:18px;">REKOR BARU!</p>
   <div class="menuButtons">
-    <button class="pillBtn primary" onclick="openPlayDifficulty()">🔄 &nbsp;Main Lagi</button>
-    <button class="pillBtn" onclick="showMainMenu()">☰ &nbsp;Menu Utama</button>
+    <button class="pillBtn primary" onclick="openPlayDifficulty()">Main Lagi</button>
+    <button class="pillBtn" onclick="showMainMenu()">Menu Utama</button>
   </div>
 </div>
 
-<!-- Model Pilih difficulty (muncul tiap tekan Play) -->
+<!-- Modal Pilih Kesulitan (muncul tiap tekan Play) -->
 <div id="playDifficultyModal" class="modalBackdrop hidden">
   <div class="modalCard">
     <h3>PILIH DIFFICULTY</h3>
     <div class="menuButtons" style="max-width:100%;">
-      <button class="pillBtn primary" onclick="chooseDifficultyAndPlay('easy')">🟢 &nbsp;Easy</button>
-      <button class="pillBtn" style="background:linear-gradient(135deg,#ffd54f,#ffb300); border:none; color:#3a2a00;" onclick="chooseDifficultyAndPlay('normal')">🟡 &nbsp;Normal</button>
-      <button class="pillBtn" style="background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.4); color:#fca5a5;" onclick="chooseDifficultyAndPlay('hard')">🔴 &nbsp;Hard</button>
+      <button class="pillBtn primary" onclick="chooseDifficultyAndPlay('easy')">Easy</button>
+      <button class="pillBtn" style="background:linear-gradient(135deg,#ffd54f,#ffb300); border:none; color:#3a2a00;" onclick="chooseDifficultyAndPlay('normal')">Normal</button>
+      <button class="pillBtn" style="background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.4); color:#fca5a5;" onclick="chooseDifficultyAndPlay('hard')">Hard</button>
     </div>
     <button class="pillBtn" style="margin-top:10px; background:transparent; border-color:transparent; color:var(--muted);" onclick="closePlayDifficulty()">Batal</button>
   </div>
 </div>
 
-<!-- Model Settings -->
+<!-- Settings -->
 <div id="settingsModal" class="modalBackdrop hidden">
   <div class="modalCard">
     <h3>PENGATURAN</h3>
 
     <div class="settingsRow">
-      <span class="settingsRowLabel">🔊 Suara</span>
+      <span class="settingsRowLabel">Suara</span>
       <div class="switchToggle" id="soundToggle" onclick="toggleSound()"><div class="knob"></div></div>
     </div>
 
@@ -796,27 +792,26 @@
 
     <p style="color:var(--muted); font-size:13px; text-align:left; margin:0 0 8px;">Tipe Perangkat</p>
     <div class="deviceSwitchRow" style="margin-bottom:22px;">
-      <button class="deviceSwitchBtn" id="deviceSwitchMobile" onclick="switchDeviceInline('mobile')">📱 Mobile</button>
-      <button class="deviceSwitchBtn" id="deviceSwitchPc" onclick="switchDeviceInline('pc')">🖥️ PC</button>
+      <button class="deviceSwitchBtn" id="deviceSwitchMobile" onclick="switchDeviceInline('mobile')">Mobile</button>
+      <button class="deviceSwitchBtn" id="deviceSwitchPc" onclick="switchDeviceInline('pc')">PC</button>
     </div>
 
     <button class="pillBtn" onclick="closeSettings()">Tutup</button>
   </div>
 </div>
 
-<!-- Model Leaderboard -->
+<!-- Leaderboard -->
 <div id="leaderboardModal" class="modalBackdrop hidden">
   <div class="modalCard">
-    <h3>🏆 SKOR TERTINGGI</h3>
+    <h3>SKOR TERTINGGI</h3>
     <div class="leaderboardValue" id="leaderboardValue">0</div>
     <button class="pillBtn" onclick="closeLeaderboard()">Tutup</button>
   </div>
 </div>
 
-<!-- Model Credit -->
+<!-- Credit -->
 <div id="creditsModal" class="modalBackdrop hidden">
   <div class="modalCard">
-    <div style="font-size:40px; margin-bottom:6px;">👤</div>
     <h3>CREDIT</h3>
     <p style="color:#fff; font-weight:700; font-size:16px; margin:0 0 2px;">by Jeyro-Progs</p>
     <p style="color:var(--green-light); font-size:13px; margin:0 0 14px;">AKA Jeykhan Ramadhan</p>
@@ -860,7 +855,7 @@ const soundIconOff = document.getElementById("soundIconOff");
 
 let snake, prevSnake, direction, food, score;
 let particles = [];
-let popups = []; // teks melayang (combo, bonus, dll)
+let popups = []; 
 let foodType = "normal";
 let foodSpawnTime = 0;
 let foodLifespan = 5000;
@@ -888,7 +883,7 @@ let highScore = Number(localStorage.getItem("snakeHighScore")) || 0;
 updateScoreDisplays();
 setDifficulty(difficulty);
 
-// Pilihan perangkat
+// ===== Pilihan perangkat =====
 function applyDeviceMode(mode) {
   deviceMode = mode;
   document.body.classList.toggle("mode-mobile", mode === "mobile");
@@ -909,7 +904,7 @@ if (deviceMode) {
 }
 
 
-//Suara (WebAudio)
+// ===== Suara (WebAudio) =====
 let audioCtx = null;
 function beep(freq, duration, type = "sine") {
   if (muted) return;
@@ -950,7 +945,6 @@ function switchDeviceInline(mode) {
   localStorage.setItem("jeysnakeDevice", mode);
   applyDeviceMode(mode);
   syncDeviceSwitchUI();
-
   if (isPlaying || isPaused) {
     if (mode === "mobile") {
       if (isPlaying) showSwipeHintTemporarily();
@@ -967,7 +961,7 @@ function syncDeviceSwitchUI() {
   document.getElementById("deviceSwitchPc").classList.toggle("active", deviceMode === "pc");
 }
 
-// Pilih Difficulty sebelum main
+// ===== Pilih kesulitan sebelum main =====
 function openPlayDifficulty() {
   hideFullScreens();
   document.getElementById("playDifficultyModal").classList.remove("hidden");
@@ -982,7 +976,7 @@ function chooseDifficultyAndPlay(level) {
   startGame();
 }
 
-//  Setting & Leaderboard
+// ===== Setting & Leaderboard =====
 function openSettings() {
   settingsModal.classList.remove("hidden");
   syncSoundToggleUI();
@@ -1001,7 +995,7 @@ function closeLeaderboard() { leaderboardModal.classList.add("hidden"); }
 function openCredits() { document.getElementById("creditsModal").classList.remove("hidden"); }
 function closeCredits() { document.getElementById("creditsModal").classList.add("hidden"); }
 
-// ===== Fitur unik: toast pencapaian =====
+// ===== toast pencapaian =====
 let toastTimeoutId = null;
 function showAchievementToast(text) {
   const toastEl = document.getElementById("achievementToast");
@@ -1015,13 +1009,13 @@ function checkMilestones() {
   for (const m of milestones) {
     if (score >= m && !achievedMilestones.has(m)) {
       achievedMilestones.add(m);
-      showAchievementToast("🏅 Skor " + m + " tercapai!");
-      break; 
+      showAchievementToast("Milestone: skor " + m + " tercapai!");
+      break;
     }
   }
 }
 
-//teks popup melayang (combo/bonus)
+// ===== teks popup melayang (combo/bonus) =====
 function spawnPopup(x, y, text, color) {
   popups.push({ x, y, text, color, life: 1 });
 }
@@ -1210,7 +1204,7 @@ function spawnFood() {
   } while (isOnSnake);
   food = newFood;
 
-  // sesekali muncul Apel Emas (bonus skor, batas waktu)
+  // muncul Apel Emas (bonus skor, batas waktu)
   foodType = Math.random() < 0.16 ? "golden" : "normal";
   foodSpawnTime = performance.now();
   foodLifespan = 5000;
@@ -1242,7 +1236,7 @@ function changeDirection(event) {
   else if ((key === "ArrowDown" || key === "s")) trySetDirection("DOWN");
 }
 
-// Kontrol swipe (mode mobile) — 
+// Kontrol swipe (mode mobile) —
 let touchStartX = 0, touchStartY = 0;
 const SWIPE_THRESHOLD = 18;
 
@@ -1267,7 +1261,7 @@ document.addEventListener("touchmove", (e) => {
   } else {
     trySetDirection(dy > 0 ? "DOWN" : "UP");
   }
-  // reset titik acuan supaya bisa langsung geser lagi ke arah lain tanpa angkat jari
+  
   touchStartX = t.clientX;
   touchStartY = t.clientY;
 }, { passive: false });
@@ -1299,7 +1293,7 @@ function tick() {
     const now = performance.now();
     const isGolden = foodType === "golden";
 
-    // sistem combo (makan cepat berturut-turut = bonus)
+    //sistem combo (makan cepat berturut-turut = bonus)
     if (now - lastEatTime < COMBO_WINDOW) comboCount++;
     else comboCount = 1;
     lastEatTime = now;
@@ -1317,7 +1311,7 @@ function tick() {
     beep(isGolden ? 880 : 660, isGolden ? 0.18 : 0.12, "square");
 
     if (isGolden) {
-      spawnPopup(food.x + box / 2, food.y, "🌟 +" + basePoints, "#ffd54f");
+      spawnPopup(food.x + box / 2, food.y, "BONUS +" + basePoints, "#ffd54f");
     }
     if (comboBonus > 0) {
       spawnPopup(food.x + box / 2, food.y - 14, "Combo x" + comboCount + "!", "#4ade80");
@@ -1554,8 +1548,9 @@ function endGame() {
   swipeHint.classList.add("hidden");
   pauseBtn.classList.add("hidden");
   soundBtn.classList.remove("hidden");
-  menuOpen = true;
+  menuOpen = true; 
   updateScoreDisplays();
+
 
   setTimeout(() => {
     gameWrapperEl.style.visibility = "hidden";

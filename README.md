@@ -1,6 +1,4 @@
-# JEY'SNAKE
-
-Game Snake buatan Jeyro-Progs (Jeykhan Ramadhan),
+# GLOW'SNAKE
 
 ## Struktur Proyek
 

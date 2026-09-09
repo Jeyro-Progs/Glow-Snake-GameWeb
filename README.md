@@ -11,8 +11,6 @@ jeysnake-vercel/
 └── README.md
 ```
 
-Karena game ini murni file HTML statis (tanpa backend/build step), Vercel akan otomatis mendeteksinya sebagai **static site** — tidak perlu framework apa pun.
-
 ## Cara Deploy
 
 ### Opsi 1: Lewat Vercel CLI (paling cepat)

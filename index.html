@@ -67,7 +67,7 @@
     100% { transform: translateY(-100vh) rotate(25deg); opacity: 0; }
   }
 
-  /* ===== Panel pojok (Score / High Score) ===== */
+  /* Panel pojok (Score / High Score)  */
   .cornerPanel {
     position: fixed;
     top: 28px;
@@ -132,7 +132,7 @@
   .bestScorePanel .label { display:flex; align-items:center; gap:8px; color: var(--muted); font-size: 13px; }
   .bestScorePanel .value { font-size: 24px; font-weight: 700; margin-top: 4px; }
 
-  /* ===== Layout panggung permainan ===== */
+  /* Layout permainan */
   .stageRow {
     height: 100vh;
     position: relative;
@@ -144,6 +144,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     visibility: hidden;
+    z-index: 5;
   }
   @media (max-width: 760px) {
     .bestScorePanel {
@@ -201,7 +202,7 @@
     display: block;
   }
 
-  /* ===== Kotak panduan kontrol ===== */
+  /* Kotak panduan kontrol  */
   #controlsHint {
     position: fixed;
     left: 32px;
@@ -236,7 +237,7 @@
   .dpad .right { grid-column: 3; grid-row: 2; }
   #controlsHint .hintText { font-size: 13px; color: var(--muted); line-height: 1.4; }
 
-  /* ===== Layar penuh (menu utama & game over) ===== */
+  /* Layar penuh */
   .fullScreenView {
     position: fixed;
     inset: 0;
@@ -355,7 +356,7 @@
   .pillBtn.primary:hover { box-shadow: 0 10px 28px rgba(34, 197, 94, 0.5); }
   .pillBtn.danger { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.35); color: #fca5a5; }
 
-  /* ===== Overlay di dalam arena (countdown & pause) ===== */
+  /* ===== Overlay di dalam gameplay (countdown & pause) ===== */
   .arenaOverlay {
     position: absolute;
     inset: 0;
@@ -383,7 +384,7 @@
     100% { transform: scale(1); opacity: 1; }
   }
 
-  /* ===== Modal (settings & leaderboard) ===== */
+  /* ===== Model (settings & leaderboard) ===== */
   .modalBackdrop {
     position: fixed;
     inset: 0;
@@ -419,7 +420,7 @@
   .diffBtn.active[data-diff="normal"] { background: #ffb300; border-color: #ffb300; color: #1e1e2f; }
   .diffBtn.active[data-diff="hard"] { background: var(--danger); border-color: var(--danger); color: #fff; }
 
-  /* ===== Toggle suara & pilihan device di Settings ===== */
+  /* Toggle suara & pilihan device di Settings */
   .settingsRow {
     display: flex;
     align-items: center;
@@ -558,8 +559,9 @@
   }
   body.mode-mobile .bestScorePanel {
     position: fixed !important;
-    top: auto !important;
-    bottom: max(92px, env(safe-area-inset-bottom));
+    /* Di atas arena: mudah terbaca dan tidak mengganggu area permainan. */
+    top: max(82px, env(safe-area-inset-top)) !important;
+    bottom: auto;
     left: 50% !important;
     transform: translateX(-50%) !important;
     min-width: 0;
@@ -606,7 +608,7 @@
       width: min(58vw, calc(100dvh - 44px), 440px) !important;
       height: min(58vw, calc(100dvh - 44px), 440px) !important;
     }
-    body.mode-mobile .bestScorePanel { bottom: 18px; }
+    body.mode-mobile .bestScorePanel { top: 18px !important; bottom: auto; }
     body.mode-mobile #swipeHint { bottom: 14px; }
   }
 </style>
@@ -762,7 +764,7 @@
   </div>
 </div>
 
-<!-- Modal Pilih Kesulitan (muncul tiap tekan Play) -->
+<!-- Model Pilih difficulty (muncul tiap tekan Play) -->
 <div id="playDifficultyModal" class="modalBackdrop hidden">
   <div class="modalCard">
     <h3>PILIH DIFFICULTY</h3>
@@ -775,7 +777,7 @@
   </div>
 </div>
 
-<!-- Modal Settings -->
+<!-- Model Settings -->
 <div id="settingsModal" class="modalBackdrop hidden">
   <div class="modalCard">
     <h3>PENGATURAN</h3>
@@ -802,7 +804,7 @@
   </div>
 </div>
 
-<!-- Modal Leaderboard -->
+<!-- Model Leaderboard -->
 <div id="leaderboardModal" class="modalBackdrop hidden">
   <div class="modalCard">
     <h3>🏆 SKOR TERTINGGI</h3>
@@ -811,7 +813,7 @@
   </div>
 </div>
 
-<!-- Modal Credit -->
+<!-- Model Credit -->
 <div id="creditsModal" class="modalBackdrop hidden">
   <div class="modalCard">
     <div style="font-size:40px; margin-bottom:6px;">👤</div>
@@ -876,6 +878,7 @@ let isPaused = false;
 let menuOpen = true;
 let countdownGen = 0;
 let countdownTimeoutId = null;
+let swipeHintTimeoutId = null;
 let difficulty = "normal";
 let muted = false;
 let deviceMode = localStorage.getItem("jeysnakeDevice") || null;
@@ -885,7 +888,7 @@ let highScore = Number(localStorage.getItem("snakeHighScore")) || 0;
 updateScoreDisplays();
 setDifficulty(difficulty);
 
-// ===== Pilihan perangkat =====
+// Pilihan perangkat
 function applyDeviceMode(mode) {
   deviceMode = mode;
   document.body.classList.toggle("mode-mobile", mode === "mobile");
@@ -904,9 +907,9 @@ if (deviceMode) {
   deviceSelect.classList.add("hidden");
   mainMenu.classList.remove("hidden");
 }
-// jika belum pernah pilih, deviceSelect (default tampil) yang akan terlihat duluan
 
-// ===== Suara sederhana (WebAudio) =====
+
+//Suara (WebAudio)
 let audioCtx = null;
 function beep(freq, duration, type = "sine") {
   if (muted) return;
@@ -947,10 +950,10 @@ function switchDeviceInline(mode) {
   localStorage.setItem("jeysnakeDevice", mode);
   applyDeviceMode(mode);
   syncDeviceSwitchUI();
-  // sesuaikan kontrol yang tampil kalau sedang bermain
+
   if (isPlaying || isPaused) {
     if (mode === "mobile") {
-      swipeHint.classList.remove("hidden");
+      if (isPlaying) showSwipeHintTemporarily();
       controlsHint.classList.add("hidden");
     } else {
       controlsHint.classList.remove("hidden");
@@ -964,7 +967,7 @@ function syncDeviceSwitchUI() {
   document.getElementById("deviceSwitchPc").classList.toggle("active", deviceMode === "pc");
 }
 
-// ===== Pilih kesulitan sebelum main (dipicu tombol Play) =====
+// Pilih Difficulty sebelum main
 function openPlayDifficulty() {
   hideFullScreens();
   document.getElementById("playDifficultyModal").classList.remove("hidden");
@@ -979,7 +982,7 @@ function chooseDifficultyAndPlay(level) {
   startGame();
 }
 
-// ===== Setting & Leaderboard modal =====
+//  Setting & Leaderboard
 function openSettings() {
   settingsModal.classList.remove("hidden");
   syncSoundToggleUI();
@@ -1013,12 +1016,12 @@ function checkMilestones() {
     if (score >= m && !achievedMilestones.has(m)) {
       achievedMilestones.add(m);
       showAchievementToast("🏅 Skor " + m + " tercapai!");
-      break; // satu toast per tick biar tidak numpuk
+      break; 
     }
   }
 }
 
-// ===== Fitur unik: teks popup melayang (combo/bonus) =====
+//teks popup melayang (combo/bonus)
 function spawnPopup(x, y, text, color) {
   popups.push({ x, y, text, color, life: 1 });
 }
@@ -1071,6 +1074,7 @@ function showMainMenu() {
   menuOpen = true;
   countdownGen++;
   clearTimeout(countdownTimeoutId);
+  clearTimeout(swipeHintTimeoutId);
   clearInterval(moveTimer);
   hideFullScreens();
   settingsModal.classList.add("hidden");
@@ -1096,7 +1100,7 @@ function startGame() {
   resumeIcon.classList.add("hidden");
 
   if (deviceMode === "mobile") {
-    swipeHint.classList.remove("hidden");
+    swipeHint.classList.add("hidden");
     controlsHint.classList.add("hidden");
   } else {
     controlsHint.classList.remove("hidden");
@@ -1134,6 +1138,7 @@ function startGame() {
     lastTickTime = performance.now();
     moveTimer = setInterval(tick, speedMap[difficulty]);
     isPlaying = true;
+    if (deviceMode === "mobile") showSwipeHintTemporarily();
   });
 
   if (!renderLoopId) renderLoopId = requestAnimationFrame(renderLoop);
@@ -1149,6 +1154,12 @@ function pauseGame() {
   if (deviceMode === "mobile") swipeHint.classList.add("hidden");
 }
 
+function showSwipeHintTemporarily() {
+  clearTimeout(swipeHintTimeoutId);
+  swipeHint.classList.remove("hidden");
+  swipeHintTimeoutId = setTimeout(() => swipeHint.classList.add("hidden"), 5000);
+}
+
 function resumeGame() {
   if (!isPaused) return;
   isPaused = false;
@@ -1157,7 +1168,6 @@ function resumeGame() {
   moveTimer = setInterval(tick, speedMap[difficulty]);
   pauseIcon.classList.remove("hidden");
   resumeIcon.classList.add("hidden");
-  if (deviceMode === "mobile") swipeHint.classList.remove("hidden");
 }
 
 pauseBtn.addEventListener("click", () => {
@@ -1200,7 +1210,7 @@ function spawnFood() {
   } while (isOnSnake);
   food = newFood;
 
-  // Fitur unik: sesekali muncul Apel Emas (bonus skor, batas waktu)
+  // sesekali muncul Apel Emas (bonus skor, batas waktu)
   foodType = Math.random() < 0.16 ? "golden" : "normal";
   foodSpawnTime = performance.now();
   foodLifespan = 5000;
@@ -1232,9 +1242,9 @@ function changeDirection(event) {
   else if ((key === "ArrowDown" || key === "s")) trySetDirection("DOWN");
 }
 
-// Kontrol swipe (mode mobile) — deteksi kontinu biar responsif seperti joystick
+// Kontrol swipe (mode mobile) — 
 let touchStartX = 0, touchStartY = 0;
-const SWIPE_THRESHOLD = 18; // makin kecil = makin sensitif/responsif
+const SWIPE_THRESHOLD = 18;
 
 document.addEventListener("touchstart", (e) => {
   if (deviceMode !== "mobile" || !isPlaying || isPaused) return;
@@ -1289,7 +1299,7 @@ function tick() {
     const now = performance.now();
     const isGolden = foodType === "golden";
 
-    // Fitur unik: sistem combo (makan cepat berturut-turut = bonus)
+    // sistem combo (makan cepat berturut-turut = bonus)
     if (now - lastEatTime < COMBO_WINDOW) comboCount++;
     else comboCount = 1;
     lastEatTime = now;
@@ -1375,7 +1385,7 @@ function drawFood(x, y, t) {
     const cy = y + box / 2;
 
     ctx.save();
-    // cincin timer (menunjukkan sisa waktu sebelum apel emas hilang)
+    // cincin timer 
     ctx.strokeStyle = "rgba(255, 213, 79, 0.55)";
     ctx.lineWidth = 2.5;
     ctx.beginPath();
@@ -1544,10 +1554,9 @@ function endGame() {
   swipeHint.classList.add("hidden");
   pauseBtn.classList.add("hidden");
   soundBtn.classList.remove("hidden");
-  menuOpen = true; // supaya arena kosong lagi di belakang layar game over
+  menuOpen = true;
   updateScoreDisplays();
 
-  // beri jeda sebentar biar animasi shake sempat kelihatan sebelum arena disembunyikan
   setTimeout(() => {
     gameWrapperEl.style.visibility = "hidden";
   }, 380);

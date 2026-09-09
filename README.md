@@ -1,6 +1,6 @@
 # JEY'SNAKE
 
-Game Snake buatan Jeyro-Progs (Jeykhan Ramadhan), siap di-deploy ke Vercel.
+Game Snake buatan Jeyro-Progs (Jeykhan Ramadhan),
 
 ## Struktur Proyek
 

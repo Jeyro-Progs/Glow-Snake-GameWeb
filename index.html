@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -15,11 +15,13 @@
     --green: #22c55e;
     --green-light: #4ade80;
     --green-glow: rgba(34, 197, 94, 0.55);
+    --cyan: #22d3ee;
+    --cyan-light: #67e8f9;
     --danger: #ef4444;
     --arena-border: rgba(34, 197, 94, 0.55);
     --arena-glow: rgba(34, 197, 94, 0.14);
   }
-    * { box-sizing: border-box; }
+  * { box-sizing: border-box; }
   html, body {
     margin: 0;
     padding: 0;
@@ -34,7 +36,18 @@
     overflow-x: hidden;
   }
 
-  /* ===== Dekorasi latar ===== */
+  /* ===== Ambient background decoration ===== */
+  .auroraBlob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(70px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+  #auroraGreen { top: -10%; left: -8%; width: 45vw; height: 45vw; background: radial-gradient(circle, rgba(34,197,94,0.35), transparent 70%); }
+  #auroraCyan { bottom: -12%; right: -10%; width: 40vw; height: 40vw; background: radial-gradient(circle, rgba(34,211,238,0.25), transparent 70%); }
+
   .decorSquare {
     position: absolute;
     border-radius: 16px;
@@ -71,7 +84,7 @@
     100% { transform: translateY(-100vh) rotate(25deg); opacity: 0; }
   }
 
-  /* ===== Panel pojok (Score / High Score) ===== */
+  /* ===== Corner panels (Score / High Score) ===== */
   .cornerPanel {
     position: fixed;
     top: 28px;
@@ -90,13 +103,39 @@
   .cornerPanel .labelBlock { display: flex; flex-direction: column; line-height: 1.15; }
   .cornerPanel .label { font-size: 13px; color: var(--muted); }
   .cornerPanel .value { font-size: 22px; font-weight: 700; }
-  .cornerPanel .value.scorePop {
-    animation: scorePop 0.35s ease;
-  }
+  .cornerPanel .value.scorePop { animation: scorePop 0.35s ease; }
+  .cornerPanel .value.scoreDrop { animation: scoreDropAnim 0.35s ease; }
   @keyframes scorePop {
     0% { transform: scale(1); color: #fff; }
     40% { transform: scale(1.5); color: #ffd54f; }
     100% { transform: scale(1); color: #fff; }
+  }
+  @keyframes scoreDropAnim {
+    0% { transform: scale(1); color: #fff; }
+    40% { transform: scale(1.3); color: #ef4444; }
+    100% { transform: scale(1); color: #fff; }
+  }
+
+  #shieldBadge {
+    position: fixed;
+    top: 82px;
+    left: 32px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(34, 211, 238, 0.15);
+    border: 1px solid rgba(34, 211, 238, 0.4);
+    color: var(--cyan-light);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 14px;
+    animation: shieldPulse 1s ease-in-out infinite;
+  }
+  @keyframes shieldPulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(34,211,238,0.3); }
+    50% { box-shadow: 0 0 16px rgba(34,211,238,0.6); }
   }
 
   .iconButtonsTopRight {
@@ -142,7 +181,7 @@
   .bestScorePanel .label { display:flex; align-items:center; gap:8px; color: var(--muted); font-size: 13px; }
   .bestScorePanel .value { font-size: 24px; font-weight: 700; margin-top: 4px; }
 
-  /* ===== Layout gameplay ===== */
+  /* ===== Game stage layout ===== */
   .stageRow {
     height: 100vh;
     position: relative;
@@ -190,6 +229,19 @@
     from { left: -60%; }
     to { left: 130%; }
   }
+  #hazardFlash {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    pointer-events: none;
+    z-index: 9;
+    background: rgba(239, 68, 68, 0);
+  }
+  #hazardFlash.flashActive { animation: hazardFlashAnim 0.4s ease; }
+  @keyframes hazardFlashAnim {
+    0% { background: rgba(239, 68, 68, 0.35); }
+    100% { background: rgba(239, 68, 68, 0); }
+  }
   #gameWrapper.shake { animation: shakeArena 0.4s ease; }
   #gameWrapper.gameOverExit { animation: arenaGameOverExit 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   @keyframes arenaGameOverExit {
@@ -215,9 +267,14 @@
     border-radius: 16px;
     box-shadow: 0 0 40px var(--arena-glow), inset 0 0 60px rgba(0,0,0,0.4);
     display: block;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  canvas.shielded {
+    border-color: rgba(34, 211, 238, 0.85) !important;
+    box-shadow: 0 0 50px rgba(34, 211, 238, 0.35), inset 0 0 60px rgba(0,0,0,0.4) !important;
   }
 
-  /* ===== Kotak kontrol ===== */
+  /* ===== Control hints ===== */
   #controlsHint {
     position: fixed;
     left: 32px;
@@ -252,7 +309,7 @@
   .dpad .right { grid-column: 3; grid-row: 2; }
   #controlsHint .hintText { font-size: 13px; color: var(--muted); line-height: 1.4; }
 
-  /* ===== Layar penuh ===== */
+  /* ===== Full screen views ===== */
   .fullScreenView {
     position: fixed;
     inset: 0;
@@ -276,7 +333,7 @@
   }
   .hidden { display: none !important; }
 
-  .logoWrap { margin-bottom: 8px; animation: logoIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both, logoBob 2.6s ease-in-out 0.7s infinite; }
+  .logoWrap { margin-bottom: 6px; animation: logoIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both, logoBob 2.6s ease-in-out 0.7s infinite; }
   .logoWrap svg { filter: drop-shadow(0 0 18px var(--green-glow)); }
   @keyframes logoIn {
     from { opacity: 0; transform: scale(0.8) translateY(-12px); }
@@ -289,18 +346,21 @@
 
   .bigTitle {
     font-family: 'Space Grotesk', 'Poppins', sans-serif;
-    font-size: 50px;
-    font-weight: 800;
-    letter-spacing: 0.16em;
-    margin: 6px 0 10px;
-    padding-left: 0.16em; /* kompensasi letter-spacing biar center pas */
+    font-size: 46px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    margin: 4px 0 8px;
+    background: linear-gradient(135deg, #fff 40%, var(--green-light) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
     animation: fadeSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
   }
   .bigSubtitle {
     color: var(--muted);
-    font-size: 15px;
+    font-size: 14px;
     letter-spacing: 0.02em;
-    margin-bottom: 40px;
+    margin-bottom: 32px;
     animation: fadeSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.24s both;
   }
   @keyframes fadeSlideUp {
@@ -322,20 +382,22 @@
   .menuButtons .pillBtn:nth-child(1) { animation-delay: 0.3s; }
   .menuButtons .pillBtn:nth-child(2) { animation-delay: 0.38s; }
   .menuButtons .pillBtn:nth-child(3) { animation-delay: 0.46s; }
-  .menuButtons .pillBtn:nth-child(4) { animation-delay: 0.54s; }
 
+  /* ===== Modern minimalist menu card ===== */
   .menuCard {
     position: relative;
     z-index: 10;
-    background: transparent;
-    border: none;
-    border-radius: 28px;
-    padding: 48px 46px 40px;
-    backdrop-filter: none;
-    box-shadow: none;
+    background: linear-gradient(165deg, rgba(255,255,255,0.055), rgba(255,255,255,0.015));
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 32px;
+    padding: 44px 34px 34px;
+    backdrop-filter: blur(22px);
+    box-shadow: 0 25px 70px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 50px rgba(34,197,94,0.06);
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    max-width: 380px;
     animation: cardPopSmooth 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
   @keyframes cardPopSmooth {
@@ -343,13 +405,92 @@
     to { opacity: 1; transform: scale(1); }
   }
   .menuDivider {
-    width: 60px;
+    width: 44px;
     height: 3px;
     border-radius: 2px;
     background: linear-gradient(90deg, transparent, var(--green), transparent);
-    margin: 4px 0 22px;
-    opacity: 0.7;
+    margin: 2px 0 20px;
+    opacity: 0.8;
   }
+
+  .heroPlayBtn {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 18px 20px;
+    border-radius: 22px;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    border: none;
+    cursor: pointer;
+    color: #06210f;
+    background: linear-gradient(135deg, var(--green-light), var(--green));
+    box-shadow: 0 12px 30px rgba(34, 197, 94, 0.4);
+    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+    animation: fadeSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+  }
+  .heroPlayBtn:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(34, 197, 94, 0.55); }
+  .heroPlayBtn:active { transform: translateY(0) scale(0.98); }
+  .heroPlayBtn::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 -130%;
+    width: 60%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.55s ease;
+  }
+  .heroPlayBtn:hover::after { left: 170%; }
+  .heroPlayBtn .menuIcon { width: 22px; height: 22px; }
+
+  .menuList {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--panel-border);
+    margin-top: 16px;
+    animation: fadeSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.38s both;
+  }
+  .menuRow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    transition: background 0.18s ease;
+  }
+  .menuRow:last-child { border-bottom: none; }
+  .menuRow:hover { background: rgba(255,255,255,0.06); }
+  .menuRow:active { background: rgba(255,255,255,0.1); }
+  .rowIcon {
+    width: 36px; height: 36px;
+    border-radius: 11px;
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    flex: 0 0 36px;
+    color: var(--green-light);
+  }
+  .rowIcon svg { width: 18px; height: 18px; }
+  .rowChevron { margin-left: auto; color: var(--muted); font-size: 18px; transition: transform 0.18s ease; }
+  .menuRow:hover .rowChevron { transform: translateX(3px); color: var(--green-light); }
+
   .pillBtn {
     position: relative;
     overflow: hidden;
@@ -394,7 +535,7 @@
   body.menu-open .cornerPanel,
   body.menu-open .iconButtonsTopRight { display: none; }
 
-  /* ===== Overlay ===== */
+  /* ===== In-arena overlays ===== */
   .arenaOverlay {
     position: absolute;
     inset: 0;
@@ -422,7 +563,7 @@
     100% { transform: scale(1); opacity: 1; }
   }
 
-  /* =====(settings & leaderboard) ===== */
+  /* ===== Modals (settings & leaderboard) ===== */
   .modalBackdrop {
     position: fixed;
     inset: 0;
@@ -442,7 +583,7 @@
   .modalCard {
     background: rgba(18, 26, 43, 0.82);
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 20px;
+    border-radius: 24px;
     padding: 30px 32px;
     width: 90%;
     max-width: 340px;
@@ -455,7 +596,7 @@
     from { opacity: 0; transform: translateY(12px) scale(0.97); }
     to { opacity: 1; transform: translateY(0) scale(1); }
   }
-  .modalCard h3 { margin: 0 0 18px; font-size: 20px; letter-spacing: 0.05em; }
+  .modalCard h3 { margin: 0 0 18px; font-size: 19px; letter-spacing: 0.06em; font-weight: 700; }
   .diffRow { display: flex; gap: 8px; justify-content: center; margin-bottom: 22px; }
   .diffBtn {
     padding: 9px 18px;
@@ -479,7 +620,6 @@
   .miniIcon { width: 16px; height: 16px; vertical-align: -3px; margin-right: 5px; }
   .miniIcon path, .miniIcon rect { stroke: currentColor; }
 
-  /* ===== Toggle suara ===== */
   .settingsRow {
     display: flex;
     align-items: center;
@@ -537,7 +677,7 @@
     margin: 10px 0 22px;
   }
 
-  /* ===== Toast pencapaian ===== */
+  /* ===== Toast ===== */
   #achievementToast {
     position: fixed;
     top: 90px;
@@ -560,7 +700,7 @@
     transform: translateX(-50%) translateY(0);
   }
 
-  /* ===== Pilihan perangkat ===== */
+  /* ===== Device select ===== */
   .deviceChoiceRow {
     display: flex;
     gap: 16px;
@@ -603,7 +743,7 @@
   .deviceBtn .deviceLabel { font-weight: 700; font-size: 15px; }
   .deviceBtn .deviceDesc { font-size: 12px; color: var(--muted); }
 
-  /* ===== Indikator swipe (mode mobile) ===== */
+  /* ===== Swipe hint (mobile) ===== */
   #swipeHint {
     position: fixed;
     left: 50%;
@@ -627,7 +767,7 @@
     50% { transform: translateX(6px); opacity: 1; }
   }
 
-  /* ===== Penyesuaian mode mobile ===== */
+  /* ===== Mobile adjustments ===== */
   body.mode-mobile canvas {
     width: min(96vw, calc(100dvh - 210px), 520px) !important;
     height: min(96vw, calc(100dvh - 210px), 520px) !important;
@@ -651,22 +791,28 @@
   body.mode-mobile .cornerPanel .icon { width: 24px; height: 20px; }
   body.mode-mobile .cornerPanel .label { font-size: 13px; }
   body.mode-mobile .cornerPanel .value { font-size: 22px; }
+  body.mode-mobile #shieldBadge { top: 66px; left: 18px; }
   body.mode-mobile .iconButtonsTopRight { top: 18px; right: 18px; gap: 12px; }
   body.mode-mobile .iconBtn { width: 46px; height: 46px; }
   body.mode-mobile .iconBtn svg { width: 20px; height: 20px; }
-  body.mode-mobile .logoWrap svg { width: 110px; height: 94px; }
-  body.mode-mobile .bigTitle { font-size: 38px; letter-spacing: 0.1em; padding-left: 0.1em; }
-  body.mode-mobile .bigSubtitle { font-size: 14px; margin-bottom: 30px; }
+  body.mode-mobile .logoWrap svg { width: 108px; height: 92px; }
+  body.mode-mobile .bigTitle { font-size: 36px; }
+  body.mode-mobile .bigSubtitle { font-size: 14px; margin-bottom: 26px; }
   body.mode-mobile .menuCard {
-    padding: 30px 26px 26px;
-    width: 92vw;
-    max-width: 420px;
+    padding: 34px 24px 28px;
+    width: 94vw;
+    max-width: 440px;
+    border-radius: 28px;
   }
   body.mode-mobile .menuButtons { max-width: 100%; gap: 16px; }
+  body.mode-mobile .heroPlayBtn { padding: 20px 22px; font-size: 18px; border-radius: 24px; }
+  body.mode-mobile .menuRow { padding: 18px 18px; font-size: 16px; }
+  body.mode-mobile .rowIcon { width: 40px; height: 40px; flex: 0 0 40px; }
+  body.mode-mobile .rowIcon svg { width: 20px; height: 20px; }
   body.mode-mobile .pillBtn { padding: 19px 22px; font-size: 17px; border-radius: 26px; }
-  body.mode-mobile .modalCard { width: 92vw; padding: 34px 26px; }
-  body.mode-mobile .modalCard h3 { font-size: 22px; }
-  body.mode-mobile .diffBtn { padding: 12px 20px; font-size: 15px; }
+  body.mode-mobile .modalCard { width: 92vw; padding: 32px 26px; border-radius: 26px; }
+  body.mode-mobile .modalCard h3 { font-size: 21px; }
+  body.mode-mobile .diffBtn { padding: 13px 20px; font-size: 15px; }
   body.mode-mobile .deviceBtn { padding: 30px 18px; }
   body.mode-mobile .deviceBtn .deviceIcon { width: 44px; height: 44px; }
   body.mode-mobile .deviceBtn .deviceLabel { font-size: 17px; }
@@ -674,7 +820,7 @@
   body.mode-mobile #swipeHint { font-size: 14px; padding: 14px 22px; bottom: 26px; }
   body.mode-mobile #controlsHint { display: none !important; }
   body.mode-mobile #achievementToast { font-size: 15px; padding: 14px 26px; top: 110px; }
-  body.mode-mobile .menuDivider { width: 70px; height: 4px; }
+  body.mode-mobile .menuDivider { width: 60px; height: 4px; }
 
   @media (max-width: 760px) and (orientation: landscape) {
     body.mode-mobile canvas {
@@ -684,11 +830,21 @@
     body.mode-mobile .bestScorePanel { top: 18px !important; bottom: auto; }
     body.mode-mobile #swipeHint { bottom: 14px; }
   }
+
+  /* ===== Desktop polish ===== */
+  @media (min-width: 900px) {
+    .menuCard { max-width: 400px; padding: 50px 40px 40px; }
+    .bigTitle { font-size: 50px; }
+  }
 </style>
 </head>
 <body>
 
-<!-- Dekorasi latar -->
+<!-- Ambient aurora background -->
+<div class="auroraBlob" id="auroraGreen"></div>
+<div class="auroraBlob" id="auroraCyan"></div>
+
+<!-- Decorative shapes -->
 <div class="decorSquare" style="top:19%; left:4%; width:70px; height:70px;"></div>
 <div class="decorSquare" style="top:25%; left:8%; width:90px; height:90px; background: rgba(76,175,80,0.09);"></div>
 <div class="decorDot" style="top:37%; left:6%;"></div>
@@ -696,10 +852,10 @@
 <div class="decorSquare" style="top:58%; right:8%; width:70px; height:70px;"></div>
 <div class="decorDot" style="top:72%; right:11%;"></div>
 
-<!-- Toast pencapaian -->
+<!-- Achievement toast -->
 <div id="achievementToast"></div>
 
-<!-- Panel pojok kiri atas -->
+<!-- Top-left corner panel -->
 <div class="cornerPanel">
   <svg class="icon" width="26" height="22" viewBox="0 0 26 22" fill="none"><path d="M2 8L7 12L13 3L19 12L24 8L22 19H4L2 8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
   <div class="labelBlock">
@@ -708,38 +864,42 @@
   </div>
 </div>
 
-<!-- Ikon pojok kanan atas -->
+<!-- Shield status badge -->
+<div id="shieldBadge" class="hidden">🛡️ <span id="shieldTimeText">0.0s</span></div>
+
+<!-- Top-right icon buttons -->
 <div class="iconButtonsTopRight">
-  <button class="iconBtn" id="soundBtn" title="Suara">
+  <button class="iconBtn" id="soundBtn" title="Sound">
     <svg id="soundIconOn" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16 8a5 5 0 010 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>
     <svg id="soundIconOff" width="18" height="18" viewBox="0 0 24 24" fill="none" class="hidden"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2"/></svg>
   </button>
-  <button class="iconBtn hidden" id="pauseBtn" title="Jeda">
+  <button class="iconBtn hidden" id="pauseBtn" title="Pause">
     <svg id="pauseIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
     <svg id="resumeIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="hidden"><path d="M6 4l14 8-14 8V4z"/></svg>
   </button>
-  <button class="iconBtn" id="gearBtn" title="Pengaturan">
+  <button class="iconBtn" id="gearBtn" title="Settings">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
   </button>
 </div>
 
-<!-- Panggung game -->
+<!-- Game stage -->
 <div class="stageRow">
   <div id="gameWrapper">
     <canvas id="gameCanvas" width="440" height="440"></canvas>
     <div id="arenaSweep"></div>
+    <div id="hazardFlash"></div>
 
-    <!-- Overlay hitung mundur -->
+    <!-- Countdown overlay -->
     <div id="countdownOverlay" class="arenaOverlay" style="display:none;">
       <div id="countdownText">3</div>
     </div>
 
-    <!-- Overlay jeda -->
+    <!-- Pause overlay -->
     <div id="pauseOverlay" class="arenaOverlay interactive hidden">
-      <h2 style="margin-bottom:20px; letter-spacing:0.15em;">DIJEDA</h2>
+      <h2 style="margin-bottom:20px; letter-spacing:0.15em;">PAUSED</h2>
       <div class="menuButtons" style="max-width:220px;">
-        <button class="pillBtn primary" onclick="resumeGame()">▶ Lanjutkan</button>
-        <button class="pillBtn danger" onclick="showMainMenu()">Menu Utama</button>
+        <button class="pillBtn primary" onclick="resumeGame()">▶ Resume</button>
+        <button class="pillBtn danger" onclick="showMainMenu()">Main Menu</button>
       </div>
     </div>
   </div>
@@ -753,7 +913,7 @@
   </div>
 </div>
 
-<!-- Kotak kontrol (PC) -->
+<!-- Control hint (PC) -->
 <div id="controlsHint" class="hidden">
   <div class="dpad">
     <div class="key up">↑</div>
@@ -761,26 +921,26 @@
     <div class="key down">↓</div>
     <div class="key right">→</div>
   </div>
-  <div class="hintText">Gunakan tombol panah<br>untuk mengendalikan ular</div>
+  <div class="hintText">Use arrow keys<br>to control the snake</div>
 </div>
 
-<!-- Indikator swipe (Mobile) -->
+<!-- Swipe hint (Mobile) -->
 <div id="swipeHint" class="hidden">
-      <span class="swipeIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12h15M14 6l6 6-6 6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-  <span>Geser layar untuk mengarahkan ular</span>
+  <span class="swipeIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12h15M14 6l6 6-6 6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+  <span>Swipe the screen to steer the snake</span>
 </div>
 
-<!-- Pilihan Perangkat -->
+<!-- Device select -->
 <div id="deviceSelect" class="fullScreenView">
   <div class="menuCard">
-    <h1 class="bigTitle" style="font-size:34px;">Pilih Device</h1>
+    <h1 class="bigTitle" style="font-size:32px;">Choose Your Device</h1>
     <div class="menuDivider"></div>
-    <div class="bigSubtitle" style="margin-bottom:26px;">Sesuaikan kontrol &amp; tampilan game</div>
+    <div class="bigSubtitle" style="margin-bottom:26px;">Adjust controls &amp; display for your device</div>
     <div class="deviceChoiceRow">
       <button class="deviceBtn" onclick="selectDevice('mobile')">
         <span class="deviceIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="6.5" y="2.5" width="11" height="19" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M10 18.5h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
         <span class="deviceLabel">Mobile</span>
-        <span class="deviceDesc">Geser layar</span>
+        <span class="deviceDesc">Swipe to move</span>
       </button>
       <button class="deviceBtn" onclick="selectDevice('pc')">
         <span class="deviceIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M9 21h6m-3-5v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
@@ -791,12 +951,11 @@
   </div>
 </div>
 
-<!-- Menu Utama -->
+<!-- Main Menu -->
 <div id="mainMenu" class="fullScreenView hidden">
-
   <div class="menuCard">
     <div class="logoWrap">
-      <svg width="130" height="110" viewBox="0 0 130 110" fill="none" role="img" aria-label="Logo ular">
+      <svg width="120" height="102" viewBox="0 0 130 110" fill="none" role="img" aria-label="Snake logo">
         <path d="M18 69c0-22 17-38 38-38 18 0 31 12 31 27 0 12-9 20-20 20-9 0-16-6-16-15 0-7 5-12 12-12 5 0 9 3 10 7" stroke="url(#g)" stroke-width="13" stroke-linecap="round"/>
         <path d="M87 58c7-15 20-21 31-13 9 7 5 21-6 23-7 2-13-2-14-8" stroke="url(#g)" stroke-width="13" stroke-linecap="round"/>
         <circle cx="111" cy="53" r="2.8" fill="#06210f"/>
@@ -812,80 +971,97 @@
     <h1 class="bigTitle">Glow'Snake</h1>
     <div class="menuDivider"></div>
     <div class="bigSubtitle">Eat <span class="dot">•</span> Grow <span class="dot">•</span> Get the High Score</div>
-    <div class="menuButtons">
-      <button class="pillBtn primary" onclick="openPlayDifficulty()"><svg class="menuIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 6 8 6-8 6V6Z" fill="currentColor" stroke="none"/></svg>Play</button>
-      <button class="pillBtn" onclick="openLeaderboard()"><svg class="menuIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19V10m7 9V5m7 14v-7M3 19h18" stroke-width="2" stroke-linecap="round"/></svg>Leaderboard</button>
-      <button class="pillBtn" onclick="openSettings()"><svg class="menuIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke-width="2"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2-1.2L14.3 3h-4.1l-.4 2.6a7 7 0 0 0-2 1.2l-2.3-.9-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 2 1.2l.4 2.6h4.1l.4-2.6a7 7 0 0 0 2-1.2l2.3.9 2-3.4-2-1.5c.1-.4.1-.8.1-1.2Z" stroke-width="1.5" stroke-linejoin="round"/></svg>Settings</button>
-      <button class="pillBtn" onclick="openCredits()"><svg class="menuIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.2" stroke-width="2"/><path d="M5.5 20c.7-3.5 3-5.3 6.5-5.3s5.8 1.8 6.5 5.3" stroke-width="2" stroke-linecap="round"/></svg>Credit</button>
+
+    <button class="heroPlayBtn" onclick="openPlayDifficulty()">
+      <svg class="menuIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 6 8 6-8 6V6Z" fill="currentColor" stroke="none"/></svg>
+      Play
+    </button>
+
+    <div class="menuList">
+      <button class="menuRow" onclick="openLeaderboard()">
+        <span class="rowIcon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 19V10m7 9V5m7 14v-7M3 19h18"/></svg></span>
+        <span>Leaderboard</span>
+        <span class="rowChevron">›</span>
+      </button>
+      <button class="menuRow" onclick="openSettings()">
+        <span class="rowIcon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linejoin="round"><circle cx="12" cy="12" r="3" stroke-width="2"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2-1.2L14.3 3h-4.1l-.4 2.6a7 7 0 0 0-2 1.2l-2.3-.9-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 2 1.2l.4 2.6h4.1l.4-2.6a7 7 0 0 0 2-1.2l2.3.9 2-3.4-2-1.5c.1-.4.1-.8.1-1.2Z"/></svg></span>
+        <span>Settings</span>
+        <span class="rowChevron">›</span>
+      </button>
+      <button class="menuRow" onclick="openCredits()">
+        <span class="rowIcon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 20c.7-3.5 3-5.3 6.5-5.3s5.8 1.8 6.5 5.3"/></svg></span>
+        <span>Credits</span>
+        <span class="rowChevron">›</span>
+      </button>
     </div>
   </div>
 </div>
 
-<!-- Layar Game Over -->
+<!-- Game Over screen -->
 <div id="gameOverScreen" class="fullScreenView hidden">
-  <h1 class="bigTitle" style="font-size:42px; color:#ff6b6b;">GAME OVER</h1>
-  <p style="color:var(--muted); margin-bottom:4px;">Skor</p>
+  <h1 class="bigTitle" style="font-size:42px; -webkit-text-fill-color:#ff6b6b; background:none;">GAME OVER</h1>
+  <p style="color:var(--muted); margin-bottom:4px;">Score</p>
   <div class="leaderboardValue" id="finalScore">0</div>
-  <p id="newRecordText" class="hidden" style="color:#ffd54f; font-weight:bold; margin-bottom:18px;">REKOR BARU!</p>
+  <p id="newRecordText" class="hidden" style="color:#ffd54f; font-weight:bold; margin-bottom:18px;">NEW RECORD!</p>
   <div class="menuButtons">
-    <button class="pillBtn primary" onclick="startGame()">Main Lagi</button>
-    <button class="pillBtn" onclick="showMainMenu()">Menu Utama</button>
+    <button class="pillBtn primary" onclick="openPlayDifficulty()">Play Again</button>
+    <button class="pillBtn" onclick="showMainMenu()">Main Menu</button>
   </div>
 </div>
 
-<!-- Modal Pilih Kesulitan (muncul tiap tekan Play) -->
+<!-- Difficulty picker (shown before every Play) -->
 <div id="playDifficultyModal" class="modalBackdrop hidden">
   <div class="modalCard">
-    <h3>PILIH DIFFICULTY</h3>
+    <h3>SELECT DIFFICULTY</h3>
     <div class="menuButtons" style="max-width:100%;">
       <button class="pillBtn primary" onclick="chooseDifficultyAndPlay('easy')"><svg class="featureIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke-width="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3m-2.9-7.1-2.1 2.1M6 18l-2.1 2.1m0-15.2L6 6.9m12 12 2.1 2.1" stroke-width="2" stroke-linecap="round"/></svg>Easy</button>
       <button class="pillBtn" style="background:linear-gradient(135deg,#ffd54f,#ffb300); border:none; color:#3a2a00;" onclick="chooseDifficultyAndPlay('normal')"><svg class="featureIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v9l6 3" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="8.5" stroke-width="2"/></svg>Normal</button>
       <button class="pillBtn" style="background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.4); color:#fca5a5;" onclick="chooseDifficultyAndPlay('hard')"><svg class="featureIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 4 19h16L12 3Z" stroke-width="2" stroke-linejoin="round"/><path d="M12 9v4m0 3h.01" stroke-width="2" stroke-linecap="round"/></svg>Hard</button>
     </div>
-    <button class="pillBtn" style="margin-top:10px; background:transparent; border-color:transparent; color:var(--muted);" onclick="closePlayDifficulty()">Batal</button>
+    <button class="pillBtn" style="margin-top:10px; background:transparent; border-color:transparent; color:var(--muted);" onclick="closePlayDifficulty()">Cancel</button>
   </div>
 </div>
 
 <!-- Settings -->
 <div id="settingsModal" class="modalBackdrop hidden">
   <div class="modalCard">
-    <h3>PENGATURAN</h3>
+    <h3>SETTINGS</h3>
 
     <div class="settingsRow">
-      <span class="settingsRowLabel">Suara</span>
+      <span class="settingsRowLabel">Sound</span>
       <div class="switchToggle" id="soundToggle" onclick="toggleSound()"><div class="knob"></div></div>
     </div>
 
-    <p class="sectionLabel"><svg class="sectionIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="2" stroke-width="2"/><path d="M9 20h6m-3-4v4" stroke-width="2" stroke-linecap="round"/></svg>Tipe Perangkat</p>
+    <p class="sectionLabel"><svg class="sectionIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="2" stroke-width="2"/><path d="M9 20h6m-3-4v4" stroke-width="2" stroke-linecap="round"/></svg>Device Type</p>
     <div class="deviceSwitchRow" style="margin-bottom:22px;">
       <button class="deviceSwitchBtn" id="deviceSwitchMobile" onclick="switchDeviceInline('mobile')"><svg class="miniIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2" stroke-width="1.8"/><path d="M10 18.5h4" stroke-width="1.8" stroke-linecap="round"/></svg>Mobile</button>
       <button class="deviceSwitchBtn" id="deviceSwitchPc" onclick="switchDeviceInline('pc')"><svg class="miniIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" stroke-width="1.8"/><path d="M9 21h6m-3-5v5" stroke-width="1.8" stroke-linecap="round"/></svg>PC</button>
     </div>
 
-    <button class="pillBtn" onclick="closeSettings()">Tutup</button>
+    <button class="pillBtn" onclick="closeSettings()">Close</button>
   </div>
 </div>
 
 <!-- Leaderboard -->
 <div id="leaderboardModal" class="modalBackdrop hidden">
   <div class="modalCard">
-    <h3>SKOR TERTINGGI</h3>
+    <h3>HIGH SCORE</h3>
     <div class="leaderboardValue" id="leaderboardValue">0</div>
-    <button class="pillBtn" onclick="closeLeaderboard()">Tutup</button>
+    <button class="pillBtn" onclick="closeLeaderboard()">Close</button>
   </div>
 </div>
 
-<!-- Credit -->
+<!-- Credits -->
 <div id="creditsModal" class="modalBackdrop hidden">
   <div class="modalCard">
-    <h3>CREDIT</h3>
+    <h3>CREDITS</h3>
     <p style="color:#fff; font-weight:700; font-size:16px; margin:0 0 2px;">by Jeyro-Progs</p>
     <p style="color:var(--green-light); font-size:13px; margin:0 0 14px;">AKA Jeykhan Ramadhan</p>
-    <p style="color:var(--muted); font-size:13px; line-height:1.6; margin:0 0 4px;">Murid SMPN 7 Tambun Selatan</p>
-    <p style="color:var(--muted); font-size:13px; line-height:1.6; margin:0 0 18px;">Semi-Profesional Software Engineer</p>
+    <p style="color:var(--muted); font-size:13px; line-height:1.6; margin:0 0 4px;">Student at SMPN 7 Tambun Selatan</p>
+    <p style="color:var(--muted); font-size:13px; line-height:1.6; margin:0 0 18px;">Semi-Professional Software Engineer</p>
     <div class="menuDivider" style="margin:0 auto 16px;"></div>
-    <p style="color:var(--muted); font-size:12px; line-height:1.6; margin:0 0 20px;">Dibuat menggunakan HTML, CSS &amp; JavaScript.<br>thanks For playing!</p>
-    <button class="pillBtn" onclick="closeCredits()">Tutup</button>
+    <p style="color:var(--muted); font-size:12px; line-height:1.6; margin:0 0 20px;">Built with HTML, CSS &amp; JavaScript.<br>Thanks for playing!</p>
+    <button class="pillBtn" onclick="closeCredits()">Close</button>
   </div>
 </div>
 
@@ -918,10 +1094,13 @@ const pauseIcon = document.getElementById("pauseIcon");
 const resumeIcon = document.getElementById("resumeIcon");
 const soundIconOn = document.getElementById("soundIconOn");
 const soundIconOff = document.getElementById("soundIconOff");
+const shieldBadge = document.getElementById("shieldBadge");
+const shieldTimeText = document.getElementById("shieldTimeText");
+const hazardFlash = document.getElementById("hazardFlash");
 
 let snake, prevSnake, direction, food, score;
 let particles = [];
-let popups = []; 
+let popups = [];
 let foodType = "normal";
 let foodSpawnTime = 0;
 let foodLifespan = 5000;
@@ -945,12 +1124,21 @@ let difficulty = "normal";
 let muted = false;
 let deviceMode = localStorage.getItem("jeysnakeDevice") || null;
 const speedMap = { easy: 220, normal: 160, hard: 100 };
+let currentSpeed = speedMap.normal;
 let highScore = Number(localStorage.getItem("snakeHighScore")) || 0;
+
+// ----- Unique mechanic: Shield power-up (temporary invincibility + wall wrap) -----
+let shieldActive = false;
+let shieldUntil = 0;
+
+// ----- Unique mechanic: Hazard / poison food (avoid it!) -----
+let hazard = null; // { x, y, spawnTime, expireTime }
+let nextHazardAt = 0;
 
 updateScoreDisplays();
 setDifficulty(difficulty);
 
-// ===== Pilihan perangkat =====
+// ===== Device selection =====
 function applyDeviceMode(mode) {
   deviceMode = mode;
   document.body.classList.toggle("mode-mobile", mode === "mobile");
@@ -972,8 +1160,7 @@ if (deviceMode) {
   document.body.classList.add("menu-open");
 }
 
-
-// ===== Suara (WebAudio) =====
+// ===== Sound (WebAudio) =====
 let audioCtx = null;
 function beep(freq, duration, type = "sine") {
   if (muted) return;
@@ -1044,7 +1231,7 @@ function closeModal(modal, onClosed) {
   }, 240);
 }
 
-// ===== Pilih kesulitan sebelum main =====
+// ===== Difficulty picker (shown before every Play) =====
 function openPlayDifficulty() {
   hideFullScreens();
   openModal(document.getElementById("playDifficultyModal"));
@@ -1057,7 +1244,7 @@ function chooseDifficultyAndPlay(level) {
   closeModal(document.getElementById("playDifficultyModal"), startGame);
 }
 
-// ===== Setting & Leaderboard =====
+// ===== Settings & Leaderboard =====
 function openSettings() {
   openModal(settingsModal);
   syncSoundToggleUI();
@@ -1076,9 +1263,9 @@ function closeLeaderboard() { closeModal(leaderboardModal); }
 function openCredits() { openModal(document.getElementById("creditsModal")); }
 function closeCredits() { closeModal(document.getElementById("creditsModal")); }
 
-// ===== toast pencapaian =====
+// ===== Achievement toast =====
 let toastTimeoutId = null;
-function showAchievementToast(text) {
+function showToast(text) {
   const toastEl = document.getElementById("achievementToast");
   clearTimeout(toastTimeoutId);
   toastEl.textContent = text;
@@ -1090,13 +1277,13 @@ function checkMilestones() {
   for (const m of milestones) {
     if (score >= m && !achievedMilestones.has(m)) {
       achievedMilestones.add(m);
-      showAchievementToast("Skor " + m + " tercapai!");
+      showToast("🏅 Score " + m + " reached!");
       break;
     }
   }
 }
 
-// ===== teks popup melayang (combo/bonus) =====
+// ===== Floating popup text (combo/bonus/penalty) =====
 function spawnPopup(x, y, text, color) {
   popups.push({ x, y, text, color, life: 1 });
 }
@@ -1170,6 +1357,7 @@ function showMainMenu() {
   swipeHint.classList.add("hidden");
   pauseBtn.classList.add("hidden");
   soundBtn.classList.remove("hidden");
+  shieldBadge.classList.add("hidden");
   document.getElementById("gameWrapper").style.visibility = "hidden";
   updateScoreDisplays();
 }
@@ -1214,6 +1402,13 @@ function startGame() {
   comboCount = 0;
   lastEatTime = 0;
   achievedMilestones.clear();
+  shieldActive = false;
+  shieldUntil = 0;
+  shieldBadge.classList.add("hidden");
+  canvas.classList.remove("shielded");
+  hazard = null;
+  nextHazardAt = performance.now() + 5000 + Math.random() * 3000;
+  currentSpeed = speedMap[difficulty];
   updateScoreDisplays();
   spawnFood();
 
@@ -1223,7 +1418,7 @@ function startGame() {
 
   runCountdown(() => {
     lastTickTime = performance.now();
-    moveTimer = setInterval(tick, speedMap[difficulty]);
+    moveTimer = setInterval(tick, currentSpeed);
     isPlaying = true;
     if (deviceMode === "mobile") showSwipeHintTemporarily();
   });
@@ -1252,7 +1447,7 @@ function resumeGame() {
   isPaused = false;
   pauseOverlay.classList.add("hidden");
   lastTickTime = performance.now();
-  moveTimer = setInterval(tick, speedMap[difficulty]);
+  moveTimer = setInterval(tick, currentSpeed);
   pauseIcon.classList.remove("hidden");
   resumeIcon.classList.add("hidden");
 }
@@ -1262,7 +1457,7 @@ pauseBtn.addEventListener("click", () => {
 });
 
 function runCountdown(callback) {
-  const steps = ["3", "2", "1", "MULAI!"];
+  const steps = ["3", "2", "1", "GO!"];
   clearTimeout(countdownTimeoutId);
   isCountdownActive = true;
   const gen = ++countdownGen;
@@ -1290,20 +1485,38 @@ function runCountdown(callback) {
 }
 
 function spawnFood() {
-  let newFood, isOnSnake;
+  let newFood, isOnSnake, isOnHazard;
   do {
     newFood = {
       x: Math.floor(Math.random() * (canvas.width / box)) * box,
       y: Math.floor(Math.random() * (canvas.height / box)) * box
     };
     isOnSnake = snake.some(seg => seg.x === newFood.x && seg.y === newFood.y);
-  } while (isOnSnake);
+    isOnHazard = hazard && hazard.x === newFood.x && hazard.y === newFood.y;
+  } while (isOnSnake || isOnHazard);
   food = newFood;
 
-  // muncul Apel Emas (bonus skor, batas waktu)
-  foodType = Math.random() < 0.16 ? "golden" : "normal";
+  // Rare special food: Golden Apple (bonus points, time-limited) or Shield (temporary invincibility)
+  const roll = Math.random();
+  if (roll < 0.16) foodType = "golden";
+  else if (roll < 0.24) foodType = "shield";
+  else foodType = "normal";
+
   foodSpawnTime = performance.now();
   foodLifespan = 5000;
+}
+
+function spawnHazard() {
+  let hx, hy, clash;
+  let tries = 0;
+  do {
+    hx = Math.floor(Math.random() * (canvas.width / box)) * box;
+    hy = Math.floor(Math.random() * (canvas.height / box)) * box;
+    clash = snake.some(seg => seg.x === hx && seg.y === hy) || (food && food.x === hx && food.y === hy);
+    tries++;
+  } while (clash && tries < 30);
+  const now = performance.now();
+  hazard = { x: hx, y: hy, spawnTime: now, expireTime: now + 4500 };
 }
 
 document.addEventListener("keydown", changeDirection);
@@ -1332,7 +1545,7 @@ function changeDirection(event) {
   else if ((key === "ArrowDown" || key === "s")) trySetDirection("DOWN");
 }
 
-// Kontrol swipe (mode mobile) —
+// ===== Swipe controls (mobile) — continuous detection for responsiveness =====
 let touchStartX = 0, touchStartY = 0;
 const SWIPE_THRESHOLD = 18;
 
@@ -1357,20 +1570,57 @@ document.addEventListener("touchmove", (e) => {
   } else {
     trySetDirection(dy > 0 ? "DOWN" : "UP");
   }
-  
+
   touchStartX = t.clientX;
   touchStartY = t.clientY;
 }, { passive: false });
 
+// ===== Unique mechanic: progressive speed ramp based on score =====
+function computeSpeedForScore() {
+  const base = speedMap[difficulty];
+  const reduction = Math.floor(score / 5) * 7;
+  return Math.max(base - reduction, Math.floor(base * 0.45));
+}
+
+function applySpeedIfChanged() {
+  const newSpeed = computeSpeedForScore();
+  if (newSpeed !== currentSpeed) {
+    const sped = newSpeed < currentSpeed;
+    currentSpeed = newSpeed;
+    if (isPlaying && !isPaused) {
+      clearInterval(moveTimer);
+      moveTimer = setInterval(tick, currentSpeed);
+    }
+    if (sped) showToast("🚀 Speed Up!");
+  }
+}
+
 function tick() {
+  const now = performance.now();
+
   if (!direction) {
-    lastTickTime = performance.now();
+    lastTickTime = now;
     return;
   }
 
-  // Apel emas kedaluwarsa kalau tidak dimakan tepat waktu -> ganti makanan baru
-  if (foodType === "golden" && performance.now() - foodSpawnTime > foodLifespan) {
+  // Golden/shield food expires if not eaten in time -> respawn
+  if ((foodType === "golden" || foodType === "shield") && now - foodSpawnTime > foodLifespan) {
     spawnFood();
+  }
+
+  // Hazard lifecycle: spawn periodically, expire if not eaten
+  if (!hazard && now >= nextHazardAt) {
+    spawnHazard();
+  } else if (hazard && now > hazard.expireTime) {
+    hazard = null;
+    nextHazardAt = now + 5000 + Math.random() * 4000;
+  }
+
+  // Shield expiry
+  if (shieldActive && now > shieldUntil) {
+    shieldActive = false;
+    canvas.classList.remove("shielded");
+    shieldBadge.classList.add("hidden");
   }
 
   prevSnake = snake.map(seg => ({ x: seg.x, y: seg.y }));
@@ -1383,18 +1633,26 @@ function tick() {
   if (direction === "RIGHT") headX += box;
   if (direction === "DOWN") headY += box;
 
+  // Shield lets the snake wrap around the arena edges instead of dying
+  if (shieldActive) {
+    if (headX < 0) headX = canvas.width - box;
+    else if (headX >= canvas.width) headX = 0;
+    if (headY < 0) headY = canvas.height - box;
+    else if (headY >= canvas.height) headY = 0;
+  }
+
   const ateFood = headX === food.x && headY === food.y;
+  const hitHazard = hazard && headX === hazard.x && headY === hazard.y;
 
   if (ateFood) {
-    const now = performance.now();
     const isGolden = foodType === "golden";
+    const isShield = foodType === "shield";
 
-    //sistem combo (makan cepat berturut-turut = bonus)
     if (now - lastEatTime < COMBO_WINDOW) comboCount++;
     else comboCount = 1;
     lastEatTime = now;
 
-    const basePoints = isGolden ? 3 : 1;
+    const basePoints = isGolden ? 3 : (isShield ? 2 : 1);
     const comboBonus = comboCount >= 2 ? comboCount - 1 : 0;
     score += basePoints + comboBonus;
 
@@ -1403,24 +1661,32 @@ function tick() {
     void cornerValue.offsetWidth;
     cornerValue.classList.add("scorePop");
 
-    spawnParticles(food.x + box / 2, food.y + box / 2, isGolden);
-    beep(isGolden ? 880 : 660, isGolden ? 0.18 : 0.12, "square");
-
-    if (isGolden) {
-      spawnPopup(food.x + box / 2, food.y, "BONUS +" + basePoints, "#ffd54f");
+    if (isShield) {
+      shieldActive = true;
+      shieldUntil = now + 4500;
+      canvas.classList.add("shielded");
+      shieldBadge.classList.remove("hidden");
+      spawnParticles(food.x + box / 2, food.y + box / 2, "shield");
+      spawnPopup(food.x + box / 2, food.y, "SHIELD!", "#67e8f9");
+      beep(520, 0.16, "triangle");
+    } else {
+      spawnParticles(food.x + box / 2, food.y + box / 2, isGolden ? "golden" : "normal");
+      beep(isGolden ? 880 : 660, isGolden ? 0.18 : 0.12, "square");
+      if (isGolden) spawnPopup(food.x + box / 2, food.y, "BONUS +" + basePoints, "#ffd54f");
     }
     if (comboBonus > 0) {
       spawnPopup(food.x + box / 2, food.y - 14, "Combo x" + comboCount + "!", "#4ade80");
     }
 
     checkMilestones();
+    applySpeedIfChanged();
     spawnFood();
     prevSnake.push({ ...prevSnake[prevSnake.length - 1] });
   }
 
   const newHead = { x: headX, y: headY };
-  const hitWall = headX < 0 || headX >= canvas.width || headY < 0 || headY >= canvas.height;
-  const hitSelf = snake.some(seg => seg.x === headX && seg.y === headY);
+  const hitWall = !shieldActive && (headX < 0 || headX >= canvas.width || headY < 0 || headY >= canvas.height);
+  const hitSelf = !shieldActive && snake.some(seg => seg.x === headX && seg.y === headY);
 
   if (hitWall || hitSelf) {
     endGame();
@@ -1430,7 +1696,26 @@ function tick() {
   snake.unshift(newHead);
   if (!ateFood) snake.pop();
 
-  lastTickTime = performance.now();
+  // Hazard penalty: score loss + shrink, avoid it!
+  if (hitHazard) {
+    score = Math.max(0, score - 2);
+    updateScoreDisplays();
+    cornerValue.classList.remove("scoreDrop");
+    void cornerValue.offsetWidth;
+    cornerValue.classList.add("scoreDrop");
+    if (snake.length > 3) snake.pop();
+    spawnParticles(hazard.x + box / 2, hazard.y + box / 2, "hazard");
+    spawnPopup(hazard.x + box / 2, hazard.y, "-2", "#ef4444");
+    beep(140, 0.22, "sawtooth");
+    hazardFlash.classList.remove("flashActive");
+    void hazardFlash.offsetWidth;
+    hazardFlash.classList.add("flashActive");
+    applySpeedIfChanged();
+    hazard = null;
+    nextHazardAt = now + 5000 + Math.random() * 4000;
+  }
+
+  lastTickTime = now;
 }
 
 function drawGrid() {
@@ -1461,32 +1746,43 @@ function roundedRect(x, y, w, h, r) {
 }
 
 function drawFood(x, y, t) {
-  // Animasi "tumbuh" saat makanan baru muncul (200ms pertama)
   const spawnElapsed = t - foodSpawnTime;
   const spawnGrow = Math.min(1, spawnElapsed / 200);
   const spawnScale = spawnGrow < 1 ? (0.2 + 0.8 * (1 - Math.pow(1 - spawnGrow, 3))) : 1;
 
-  if (foodType === "golden") {
+  if (foodType === "golden" || foodType === "shield") {
     const remaining = Math.max(0, 1 - (t - foodSpawnTime) / foodLifespan);
     const pulse = 1 + Math.sin(t / 140) * 0.12;
     const size = (box - 6) * pulse * (0.7 + remaining * 0.3) * spawnScale;
     const offset = (box - size) / 2;
     const cx = x + box / 2;
     const cy = y + box / 2;
+    const color = foodType === "golden" ? "#ffd54f" : "#22d3ee";
+    const ringColor = foodType === "golden" ? "rgba(255, 213, 79, 0.55)" : "rgba(34, 211, 238, 0.6)";
 
     ctx.save();
-    // cincin timer 
-    ctx.strokeStyle = "rgba(255, 213, 79, 0.55)";
+    ctx.strokeStyle = ringColor;
     ctx.lineWidth = 2.5;
     ctx.beginPath();
     ctx.arc(cx, cy, box / 2 + 2, -Math.PI / 2, -Math.PI / 2 + remaining * Math.PI * 2);
     ctx.stroke();
 
-    ctx.shadowColor = "#ffd54f";
+    ctx.shadowColor = color;
     ctx.shadowBlur = 20;
-    ctx.fillStyle = "#ffd54f";
-    roundedRect(x + offset, y + offset, size, size, 6);
-    ctx.fill();
+    ctx.fillStyle = color;
+    if (foodType === "shield") {
+      // diamond shape for shield power-up
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - size / 2);
+      ctx.lineTo(cx + size / 2, cy);
+      ctx.lineTo(cx, cy + size / 2);
+      ctx.lineTo(cx - size / 2, cy);
+      ctx.closePath();
+      ctx.fill();
+    } else {
+      roundedRect(x + offset, y + offset, size, size, 6);
+      ctx.fill();
+    }
     ctx.restore();
     return;
   }
@@ -1504,10 +1800,49 @@ function drawFood(x, y, t) {
   ctx.restore();
 }
 
-function spawnParticles(x, y, golden) {
-  const colors = golden
-    ? ["#ffd54f", "#ffb300", "#ffffff", "#fff3c4"]
-    : ["#4ade80", "#22c55e", "#ffffff", "#a7f3d0"];
+function drawHazard(x, y, t) {
+  if (!hazard) return;
+  const spawnElapsed = t - hazard.spawnTime;
+  const spawnGrow = Math.min(1, spawnElapsed / 200);
+  const spawnScale = spawnGrow < 1 ? (0.2 + 0.8 * (1 - Math.pow(1 - spawnGrow, 3))) : 1;
+  const totalLife = hazard.expireTime - hazard.spawnTime;
+  const remaining = Math.max(0, 1 - (t - hazard.spawnTime) / totalLife);
+  const pulse = 1 + Math.sin(t / 130) * 0.1;
+  const size = (box - 6) * pulse * spawnScale;
+  const offset = (box - size) / 2;
+  const cx = x + box / 2;
+  const cy = y + box / 2;
+
+  ctx.save();
+  ctx.strokeStyle = "rgba(239, 68, 68, 0.55)";
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.arc(cx, cy, box / 2 + 2, -Math.PI / 2, -Math.PI / 2 + remaining * Math.PI * 2);
+  ctx.stroke();
+
+  ctx.shadowColor = "#ef4444";
+  ctx.shadowBlur = 18;
+  ctx.fillStyle = "#7f1d1d";
+  roundedRect(x + offset, y + offset, size, size, 6);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.save();
+  ctx.font = Math.max(8, box * 0.55 * spawnScale) + "px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("☠", cx, cy + 1);
+  ctx.restore();
+}
+
+function spawnParticles(x, y, kind) {
+  const palette = {
+    golden: ["#ffd54f", "#ffb300", "#ffffff", "#fff3c4"],
+    shield: ["#22d3ee", "#67e8f9", "#ffffff", "#a5f3fc"],
+    hazard: ["#ef4444", "#7f1d1d", "#ffffff", "#fca5a5"],
+    normal: ["#4ade80", "#22c55e", "#ffffff", "#a7f3d0"]
+  };
+  const colors = palette[kind] || palette.normal;
   for (let i = 0; i < 12; i++) {
     const angle = (Math.PI * 2 * i) / 12 + Math.random() * 0.4;
     const speed = 1 + Math.random() * 2;
@@ -1555,8 +1890,13 @@ function drawSnake(t) {
   const now = performance.now();
 
   ctx.save();
-  ctx.shadowColor = "#22c55e";
-  ctx.shadowBlur = 10;
+  if (shieldActive) {
+    ctx.shadowColor = "#22d3ee";
+    ctx.shadowBlur = 18;
+  } else {
+    ctx.shadowColor = "#22c55e";
+    ctx.shadowBlur = 10;
+  }
 
   for (let i = interp.length - 1; i >= 0; i--) {
     const seg = interp[i];
@@ -1567,7 +1907,11 @@ function drawSnake(t) {
     const wx = seg.x + (direction === "UP" || direction === "DOWN" ? wave : 0);
     const wy = seg.y + (direction === "LEFT" || direction === "RIGHT" ? wave : 0);
 
-    ctx.fillStyle = isHead ? "#4ade80" : "#22c55e";
+    if (shieldActive) {
+      ctx.fillStyle = isHead ? "#a5f3fc" : "#22d3ee";
+    } else {
+      ctx.fillStyle = isHead ? "#4ade80" : "#22c55e";
+    }
     roundedRect(wx + pad, wy + pad, box - pad * 2, box - pad * 2, isHead ? 7 : 6);
     ctx.fill();
   }
@@ -1602,10 +1946,16 @@ function renderLoop(now) {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   drawGrid();
 
+  if (hazard) drawHazard(hazard.x, hazard.y, now);
   if (food) drawFood(food.x, food.y, isCountdownActive ? foodSpawnTime + 250 : now);
   if (snake) {
-    const t = (isPlaying && !isPaused) ? Math.min(1, (now - lastTickTime) / speedMap[difficulty]) : 1;
+    const t = (isPlaying && !isPaused) ? Math.min(1, (now - lastTickTime) / currentSpeed) : 1;
     drawSnake(t);
+  }
+
+  if (shieldActive) {
+    const remainingMs = Math.max(0, shieldUntil - now);
+    shieldTimeText.textContent = (remainingMs / 1000).toFixed(1) + "s";
   }
 
   const dt = now - lastFrameTime;
@@ -1644,9 +1994,10 @@ function endGame() {
   swipeHint.classList.add("hidden");
   pauseBtn.classList.add("hidden");
   soundBtn.classList.remove("hidden");
-  menuOpen = true; 
+  shieldBadge.classList.add("hidden");
+  canvas.classList.remove("shielded");
+  menuOpen = true;
   updateScoreDisplays();
-
 
   setTimeout(() => {
     gameWrapperEl.classList.remove("shake");

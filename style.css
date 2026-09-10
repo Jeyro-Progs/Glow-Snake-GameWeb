@@ -478,7 +478,19 @@
     flex: 0 0 36px;
     color: var(--green-light);
   }
-  .rowIcon svg { width: 18px; height: 18px; }
+  .rowIcon svg { width: 19px; height: 19px; display: block; }
+  .rowIconLeaderboard svg, .rowIconSettings svg, .rowIconCredits svg {
+    filter: drop-shadow(0 0 5px rgba(74, 222, 128, 0.18));
+  }
+  .rowIconLeaderboard, .rowIconSettings, .rowIconCredits {
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+  .menuRow:hover .rowIconLeaderboard,
+  .menuRow:hover .rowIconSettings,
+  .menuRow:hover .rowIconCredits {
+    background: rgba(74, 222, 128, 0.12);
+    transform: translateY(-1px);
+  }
   .rowChevron { margin-left: auto; color: var(--muted); font-size: 18px; transition: transform 0.18s ease; }
   .menuRow:hover .rowChevron { transform: translateX(3px); color: var(--green-light); }
 

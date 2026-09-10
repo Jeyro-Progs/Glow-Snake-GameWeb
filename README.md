@@ -1,42 +1,43 @@
-# 🐍 GlowSnake
+# GlowSnake
 
-GlowSnake adalah game Snake sederhana dengan tampilan neon/glowing yang saya buat sebagai salah satu project untuk belajar dan mengembangkan skill web development.
+GlowSnake is a simple Snake game with a modern neon-inspired interface, created as a personal project to practice and improve my web development skills.
 
-Gameplay-nya masih terinspirasi dari Snake klasik, tapi saya coba bikin tampilannya lebih modern dan enak dilihat.
+The gameplay is inspired by the classic Snake game, with a focus on a clean and modern visual experience.
 
-## 🎮 Fitur
+## Features
 
-* 🐍 Classic Snake gameplay
-* ✨ Tampilan neon / glowing
-* 🎯 Sistem score
-* 📈 High score
-* ⏸️ Pause & resume
-* 🔄 Restart game
-* 📱 Bisa dimainkan di browser
-* 🎮 Support keyboard untuk kontrol
+* Classic Snake gameplay
+* Neon / glowing interface
+* Score system
+* High score
+* Pause and resume
+* Restart game
+* Keyboard controls
+* Playable directly in the browser
 
-## 🛠️ Dibuat dengan
+## Built With
 
 * HTML
 * CSS
 * JavaScript
 
-## 🚀 Coba Gamennya
+## Live Demo
 
-**Live Demo:**
-[GlowSnake](https://glowsnake.vercel.app/)
+Play GlowSnake directly in your browser:
 
-## 📂 Project ini dibuat untuk
+**[GlowSnake](https://glowsnake.vercel.app/)**
 
-Project ini awalnya dibuat sebagai latihan sekaligus eksperimen untuk memahami cara kerja HTML, CSS, dan JavaScript dalam membuat game yang bisa langsung dimainkan di browser.
+## About the Project
 
-Masih banyak hal yang bisa dikembangkan dari project ini, jadi kemungkinan bakal ada update lagi.
+GlowSnake was created as a learning project to explore how HTML, CSS, and JavaScript can be used to build an interactive browser game.
 
-## 🔧 Status
+The project is still under development, with potential improvements and new features planned for future updates.
 
-**Playable ✅**
+## Status
 
-Project sudah bisa dimainkan, tapi masih dalam tahap pengembangan. Bug atau fitur baru mungkin masih muncul seiring project ini dikembangkan.
+**Playable**
+
+The game is currently playable but still in development. Bugs and changes may occur as the project continues to evolve.
 
 ---
 

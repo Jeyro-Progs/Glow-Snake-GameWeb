@@ -1,841 +1,473 @@
-:root {
-    --bg: #0b0f19;
-    --panel: #121a2b;
-    --panel-border: rgba(255,255,255,0.08);
-    --muted: #8b93a7;
-    --green: #22c55e;
-    --green-light: #4ade80;
-    --green-glow: rgba(34, 197, 94, 0.55);
-    --cyan: #22d3ee;
-    --cyan-light: #67e8f9;
-    --danger: #ef4444;
-    --arena-border: rgba(34, 197, 94, 0.55);
-    --arena-glow: rgba(34, 197, 94, 0.14);
-  }
-  * { box-sizing: border-box; }
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-  }
-  body {
-    background: radial-gradient(circle at 50% 18%, #111d2e 0%, var(--bg) 48%, #070b13 100%);
-    color: #fff;
-    font-family: 'Poppins', 'Segoe UI', system-ui, Arial, sans-serif;
-    min-height: 100vh;
-    position: relative;
-    overflow-x: hidden;
-  }
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const box = 22;
 
-  /* ===== Ambient background decoration ===== */
-  .auroraBlob {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(70px);
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.5;
-  }
-  #auroraGreen { top: -10%; left: -8%; width: 45vw; height: 45vw; background: radial-gradient(circle, rgba(34,197,94,0.35), transparent 70%); }
-  #auroraCyan { bottom: -12%; right: -10%; width: 40vw; height: 40vw; background: radial-gradient(circle, rgba(34,211,238,0.25), transparent 70%); }
+const deviceSelect = document.getElementById("deviceSelect");
+const swipeHint = document.getElementById("swipeHint");
+const mainMenu = document.getElementById("mainMenu");
+const gameOverScreen = document.getElementById("gameOverScreen");
+const countdownOverlay = document.getElementById("countdownOverlay");
+const countdownText = document.getElementById("countdownText");
+const pauseOverlay = document.getElementById("pauseOverlay");
+const bestScorePanel = document.getElementById("bestScorePanel");
+const bestScoreValue = document.getElementById("bestScoreValue");
+const controlsHint = document.getElementById("controlsHint");
+const cornerLabel = document.getElementById("cornerLabel");
+const cornerValue = document.getElementById("cornerValue");
+const finalScoreEl = document.getElementById("finalScore");
+const newRecordText = document.getElementById("newRecordText");
+const pauseBtn = document.getElementById("pauseBtn");
+const soundBtn = document.getElementById("soundBtn");
+const gearBtn = document.getElementById("gearBtn");
+const settingsModal = document.getElementById("settingsModal");
+const leaderboardModal = document.getElementById("leaderboardModal");
+const leaderboardValueEl = document.getElementById("leaderboardValue");
+const pauseIcon = document.getElementById("pauseIcon");
+const resumeIcon = document.getElementById("resumeIcon");
+const soundIconOn = document.getElementById("soundIconOn");
+const soundIconOff = document.getElementById("soundIconOff");
+const shieldBadge = document.getElementById("shieldBadge");
+const shieldTimeText = document.getElementById("shieldTimeText");
+const hazardFlash = document.getElementById("hazardFlash");
 
-  .decorSquare {
-    position: absolute;
-    border-radius: 16px;
-    background: rgba(76, 175, 80, 0.06);
-    pointer-events: none;
-    z-index: 1;
-    filter: blur(3px);
-  }
-  .decorDot {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    border-radius: 4px;
-    background: var(--green);
-    opacity: 0.55;
-    pointer-events: none;
-    z-index: 1;
-    filter: blur(1px);
-  }
-  .floatParticle {
-    position: fixed;
-    bottom: -30px;
-    font-size: 16px;
-    opacity: 0;
-    animation: floatUp linear infinite;
-    pointer-events: none;
-    z-index: 2;
-    filter: drop-shadow(0 0 5px var(--green-glow));
-  }
-  @keyframes floatUp {
-    0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-    10% { opacity: 0.7; }
-    90% { opacity: 0.4; }
-    100% { transform: translateY(-100vh) rotate(25deg); opacity: 0; }
-  }
+let snake, prevSnake, direction, food, score;
+let particles = [];
+let popups = [];
+let foodType = "normal";
+let foodSpawnTime = 0;
+let foodLifespan = 5000;
+let comboCount = 0;
+let lastEatTime = 0;
+const COMBO_WINDOW = 2600;
+const achievedMilestones = new Set();
+const milestones = [10, 20, 35, 50, 75, 100];
+let lastFrameTime = performance.now();
+let moveTimer = null;
+let renderLoopId = null;
+let lastTickTime = 0;
+let isPlaying = false;
+let isPaused = false;
+let menuOpen = true;
+let countdownGen = 0;
+let countdownTimeoutId = null;
+let isCountdownActive = false;
+let swipeHintTimeoutId = null;
+let difficulty = "normal";
+let muted = false;
+let deviceMode = localStorage.getItem("jeysnakeDevice") || null;
+const speedMap = { easy: 220, normal: 160, hard: 100 };
+let currentSpeed = speedMap.normal;
+let highScore = Number(localStorage.getItem("snakeHighScore")) || 0;
 
-  /* ===== Corner panels (Score / High Score) ===== */
-  .cornerPanel {
-    position: fixed;
-    top: 28px;
-    left: 32px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    z-index: 20;
-    animation: hudEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-  @keyframes hudEnter {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .cornerPanel .icon { color: var(--green); flex-shrink: 0; }
-  .cornerPanel .labelBlock { display: flex; flex-direction: column; line-height: 1.15; }
-  .cornerPanel .label { font-size: 13px; color: var(--muted); }
-  .cornerPanel .value { font-size: 22px; font-weight: 700; }
-  .cornerPanel .value.scorePop { animation: scorePop 0.35s ease; }
-  .cornerPanel .value.scoreDrop { animation: scoreDropAnim 0.35s ease; }
-  @keyframes scorePop {
-    0% { transform: scale(1); color: #fff; }
-    40% { transform: scale(1.5); color: #ffd54f; }
-    100% { transform: scale(1); color: #fff; }
-  }
-  @keyframes scoreDropAnim {
-    0% { transform: scale(1); color: #fff; }
-    40% { transform: scale(1.3); color: #ef4444; }
-    100% { transform: scale(1); color: #fff; }
-  }
+// ----- Unique mechanic: Shield power-up (temporary invincibility + wall wrap) -----
+let shieldActive = false;
+let shieldUntil = 0;
 
-  #shieldBadge {
-    position: fixed;
-    top: 82px;
-    left: 32px;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(34, 211, 238, 0.15);
-    border: 1px solid rgba(34, 211, 238, 0.4);
-    color: var(--cyan-light);
-    font-size: 13px;
-    font-weight: 700;
-    padding: 6px 12px;
-    border-radius: 14px;
-    animation: shieldPulse 1s ease-in-out infinite;
-  }
-  @keyframes shieldPulse {
-    0%, 100% { box-shadow: 0 0 8px rgba(34,211,238,0.3); }
-    50% { box-shadow: 0 0 16px rgba(34,211,238,0.6); }
-  }
+// ----- Unique mechanic: Hazard / poison food (avoid it!) -----
+let hazard = null; // { x, y, spawnTime, expireTime }
+let nextHazardAt = 0;
 
-  .iconButtonsTopRight {
-    position: fixed;
-    top: 24px;
-    right: 32px;
-    display: flex;
-    gap: 10px;
-    z-index: 20;
-  }
-  .iconBtn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid var(--panel-border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .iconBtn:hover { background: rgba(255,255,255,0.14); transform: translateY(-2px) scale(1.04); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
-  .iconBtn:active { transform: scale(0.94); }
+updateScoreDisplays();
+setDifficulty(difficulty);
 
-  .bestScorePanel {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    background: var(--panel);
-    border: 1px solid var(--panel-border);
-    border-radius: 16px;
-    padding: 16px 22px;
-    min-width: 150px;
-    animation: fadeSlideUp 0.4s ease;
-    position: absolute;
-    top: 50%;
-    left: calc(50% + 260px);
-    transform: translateY(-50%);
-  }
-  .bestScorePanel .label { display:flex; align-items:center; gap:8px; color: var(--muted); font-size: 13px; }
-  .bestScorePanel .value { font-size: 24px; font-weight: 700; margin-top: 4px; }
+// ===== Device selection =====
+function applyDeviceMode(mode) {
+  deviceMode = mode;
+  document.body.classList.toggle("mode-mobile", mode === "mobile");
+  document.body.classList.toggle("mode-pc", mode === "pc");
+}
 
-  /* ===== Game stage layout ===== */
-  .stageRow {
-    height: 100vh;
-    position: relative;
-  }
+function selectDevice(mode) {
+  localStorage.setItem("jeysnakeDevice", mode);
+  applyDeviceMode(mode);
+  deviceSelect.classList.add("hidden");
+  mainMenu.classList.remove("hidden");
+  document.body.classList.add("menu-open");
+}
 
-  #gameWrapper {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    visibility: hidden;
-    z-index: 5;
-  }
-  @media (max-width: 760px) {
-    .bestScorePanel {
-      position: static;
-      transform: none;
-      margin: 16px auto 0;
+if (deviceMode) {
+  applyDeviceMode(deviceMode);
+  deviceSelect.classList.add("hidden");
+  mainMenu.classList.remove("hidden");
+  document.body.classList.add("menu-open");
+}
+
+// ===== Sound (WebAudio) =====
+let audioCtx = null;
+
+function beep(freq, duration, type = "sine") {
+  if (muted) return;
+
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = type;
+    osc.frequency.value = freq;
+
+    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(
+      0.001,
+      audioCtx.currentTime + duration
+    );
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch (e) {}
+}
+
+soundBtn.addEventListener("click", () => {
+  muted = !muted;
+  soundIconOn.classList.toggle("hidden", muted);
+  soundIconOff.classList.toggle("hidden", !muted);
+  syncSoundToggleUI();
+});
+
+function toggleSound() {
+  muted = !muted;
+  soundIconOn.classList.toggle("hidden", muted);
+  soundIconOff.classList.toggle("hidden", !muted);
+  syncSoundToggleUI();
+}
+
+function syncSoundToggleUI() {
+  document.getElementById("soundToggle").classList.toggle("on", !muted);
+}
+
+function switchDeviceInline(mode) {
+  localStorage.setItem("jeysnakeDevice", mode);
+  applyDeviceMode(mode);
+  syncDeviceSwitchUI();
+
+  if (isPlaying || isPaused) {
+    if (mode === "mobile") {
+      if (isPlaying) showSwipeHintTemporarily();
+      controlsHint.classList.add("hidden");
+    } else {
+      controlsHint.classList.remove("hidden");
+      swipeHint.classList.add("hidden");
     }
   }
-  #gameWrapper.startPop { animation: arenaStartPop 0.5s ease; }
-  @keyframes arenaStartPop {
-    0% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.3; filter: brightness(1.8); }
-    60% { transform: translate(-50%, -50%) scale(1.03); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; filter: brightness(1); }
-  }
-  #arenaSweep {
-    position: absolute;
-    inset: 0;
-    border-radius: 16px;
-    overflow: hidden;
-    pointer-events: none;
-    z-index: 8;
-  }
-  #arenaSweep::after {
-    content: "";
-    position: absolute;
-    top: 0; left: -60%;
-    width: 40%; height: 100%;
-    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
-    transform: skewX(-20deg);
-  }
-  #arenaSweep.playSweep::after { animation: sweepMove 0.9s ease-out; }
-  @keyframes sweepMove {
-    from { left: -60%; }
-    to { left: 130%; }
-  }
-  #hazardFlash {
-    position: absolute;
-    inset: 0;
-    border-radius: 16px;
-    pointer-events: none;
-    z-index: 9;
-    background: rgba(239, 68, 68, 0);
-  }
-  #hazardFlash.flashActive { animation: hazardFlashAnim 0.4s ease; }
-  @keyframes hazardFlashAnim {
-    0% { background: rgba(239, 68, 68, 0.35); }
-    100% { background: rgba(239, 68, 68, 0); }
-  }
-  #gameWrapper.shake { animation: shakeArena 0.4s ease; }
-  #gameWrapper.gameOverExit { animation: arenaGameOverExit 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  @keyframes arenaGameOverExit {
-    from { transform: translate(-50%, -50%) scale(1); opacity: 1; filter: blur(0); }
-    to { transform: translate(-50%, -50%) scale(0.94); opacity: 0; filter: blur(7px); }
-  }
-  @keyframes shakeArena {
-    0% { transform: translate(-50%, -50%); }
-    10% { transform: translate(calc(-50% - 6px), calc(-50% + 3px)); }
-    20% { transform: translate(calc(-50% + 5px), calc(-50% - 4px)); }
-    30% { transform: translate(calc(-50% - 4px), calc(-50% + 4px)); }
-    40% { transform: translate(calc(-50% + 6px), calc(-50% + 2px)); }
-    50% { transform: translate(calc(-50% - 5px), calc(-50% - 3px)); }
-    60% { transform: translate(calc(-50% + 4px), calc(-50% + 3px)); }
-    70% { transform: translate(calc(-50% - 3px), calc(-50% - 2px)); }
-    80% { transform: translate(calc(-50% + 2px), calc(-50% + 2px)); }
-    90% { transform: translate(calc(-50% - 1px), calc(-50% - 1px)); }
-    100% { transform: translate(-50%, -50%); }
-  }
-  canvas {
-    background: #0a0f1a;
-    border: 2px solid var(--arena-border);
-    border-radius: 16px;
-    box-shadow: 0 0 40px var(--arena-glow), inset 0 0 60px rgba(0,0,0,0.4);
-    display: block;
-    transition: border-color 0.4s ease, box-shadow 0.4s ease;
-  }
-  canvas.shielded {
-    border-color: rgba(34, 211, 238, 0.85) !important;
-    box-shadow: 0 0 50px rgba(34, 211, 238, 0.35), inset 0 0 60px rgba(0,0,0,0.4) !important;
-  }
+}
 
-  /* ===== Control hints ===== */
-  #controlsHint {
-    position: fixed;
-    left: 32px;
-    bottom: 28px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    background: var(--panel);
-    border: 1px solid var(--panel-border);
-    border-radius: 16px;
-    padding: 14px 18px;
-    z-index: 15;
-    animation: fadeSlideUp 0.4s ease 0.1s both;
-  }
-  .dpad {
-    display: grid;
-    grid-template-columns: repeat(3, 30px);
-    grid-template-rows: repeat(2, 30px);
-    gap: 4px;
-  }
-  .dpad .key {
-    width: 30px; height: 30px;
-    border-radius: 8px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid var(--panel-border);
-    display: flex; align-items: center; justify-content: center;
-    color: #cfd6e4;
-  }
-  .dpad .up { grid-column: 2; grid-row: 1; }
-  .dpad .left { grid-column: 1; grid-row: 2; }
-  .dpad .down { grid-column: 2; grid-row: 2; }
-  .dpad .right { grid-column: 3; grid-row: 2; }
-  #controlsHint .hintText { font-size: 13px; color: var(--muted); line-height: 1.4; }
+function syncDeviceSwitchUI() {
+  document
+    .getElementById("deviceSwitchMobile")
+    .classList.toggle("active", deviceMode === "mobile");
 
-  /* ===== Full screen views ===== */
-  .fullScreenView {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    z-index: 30;
-    padding: 20px;
-    animation: viewFadeIn 0.25s ease-out;
-  }
-  #gameOverScreen.gameOverReveal { animation: gameOverReveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
-  @keyframes gameOverReveal {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes viewFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  .hidden { display: none !important; }
+  document
+    .getElementById("deviceSwitchPc")
+    .classList.toggle("active", deviceMode === "pc");
+}
 
-  .logoWrap { margin-bottom: 6px; animation: logoIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both, logoBob 2.6s ease-in-out 0.7s infinite; }
-  .logoWrap svg { filter: drop-shadow(0 0 18px var(--green-glow)); }
-  @keyframes logoIn {
-    from { opacity: 0; transform: scale(0.8) translateY(-12px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
-  }
-  @keyframes logoBob {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-6px) rotate(-2deg); }
-  }
+function openModal(modal) {
+  modal.classList.remove("modalClosing");
+  modal.classList.remove("hidden");
+}
 
-  .bigTitle {
-    font-family: 'Space Grotesk', 'Poppins', sans-serif;
-    font-size: 46px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    margin: 4px 0 8px;
-    background: linear-gradient(135deg, #fff 40%, var(--green-light) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: fadeSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
-  }
-  .bigSubtitle {
-    color: var(--muted);
-    font-size: 14px;
-    letter-spacing: 0.02em;
-    margin-bottom: 32px;
-    animation: fadeSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.24s both;
-  }
-  @keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(14px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .bigSubtitle .dot { margin: 0 10px; opacity: 0.6; }
+function closeModal(modal, onClosed) {
+  modal.classList.add("modalClosing");
 
-  .menuButtons {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    width: 100%;
-    max-width: 360px;
-  }
-  .menuButtons .pillBtn {
-    animation: fadeSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-  .menuButtons .pillBtn:nth-child(1) { animation-delay: 0.3s; }
-  .menuButtons .pillBtn:nth-child(2) { animation-delay: 0.38s; }
-  .menuButtons .pillBtn:nth-child(3) { animation-delay: 0.46s; }
+  setTimeout(() => {
+    modal.classList.add("hidden");
+    modal.classList.remove("modalClosing");
 
-  /* ===== Modern minimalist menu card ===== */
-  .menuCard {
-    position: relative;
-    z-index: 10;
-    background: linear-gradient(165deg, rgba(255,255,255,0.055), rgba(255,255,255,0.015));
-    border: 1px solid rgba(255,255,255,0.09);
-    border-radius: 32px;
-    padding: 44px 34px 34px;
-    backdrop-filter: blur(22px);
-    box-shadow: 0 25px 70px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 50px rgba(34,197,94,0.06);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 380px;
-    animation: cardPopSmooth 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-  @keyframes cardPopSmooth {
-    from { opacity: 0; transform: scale(0.94); }
-    to { opacity: 1; transform: scale(1); }
-  }
-  .menuDivider {
-    width: 44px;
-    height: 3px;
-    border-radius: 2px;
-    background: linear-gradient(90deg, transparent, var(--green), transparent);
-    margin: 2px 0 20px;
-    opacity: 0.8;
-  }
+    if (onClosed) onClosed();
+  }, 240);
+}
 
-  .heroPlayBtn {
-    position: relative;
-    overflow: hidden;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 18px 20px;
-    border-radius: 22px;
-    font-size: 17px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    border: none;
-    cursor: pointer;
-    color: #06210f;
-    background: linear-gradient(135deg, var(--green-light), var(--green));
-    box-shadow: 0 12px 30px rgba(34, 197, 94, 0.4);
-    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
-    animation: fadeSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
-  }
-  .heroPlayBtn:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(34, 197, 94, 0.55); }
-  .heroPlayBtn:active { transform: translateY(0) scale(0.98); }
-  .heroPlayBtn::after {
-    content: "";
-    position: absolute;
-    inset: 0 auto 0 -130%;
-    width: 60%;
-    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
-    transform: skewX(-20deg);
-    transition: left 0.55s ease;
-  }
-  .heroPlayBtn:hover::after { left: 170%; }
-  .heroPlayBtn .menuIcon { width: 22px; height: 22px; }
+// ===== Difficulty picker (shown before every Play) =====
+function openPlayDifficulty() {
+  hideFullScreens();
+  openModal(document.getElementById("playDifficultyModal"));
+}
 
-  .menuList {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    border-radius: 20px;
-    overflow: hidden;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--panel-border);
-    margin-top: 16px;
-    animation: fadeSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.38s both;
-  }
-  .menuRow {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 16px 18px;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    color: #fff;
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    width: 100%;
-    text-align: left;
-    transition: background 0.18s ease;
-  }
-  .menuRow:last-child { border-bottom: none; }
-  .menuRow:hover { background: rgba(255,255,255,0.06); }
-  .menuRow:active { background: rgba(255,255,255,0.1); }
-  .rowIcon {
-    width: 36px; height: 36px;
-    border-radius: 11px;
-    background: rgba(255,255,255,0.06);
-    display: flex; align-items: center; justify-content: center;
-    flex: 0 0 36px;
-    color: var(--green-light);
-  }
-  .rowIcon svg { width: 19px; height: 19px; display: block; }
-  .rowIconLeaderboard svg, .rowIconSettings svg, .rowIconCredits svg {
-    filter: drop-shadow(0 0 5px rgba(74, 222, 128, 0.18));
-  }
-  .rowIconLeaderboard, .rowIconSettings, .rowIconCredits {
-    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
-  }
-  .menuRow:hover .rowIconLeaderboard,
-  .menuRow:hover .rowIconSettings,
-  .menuRow:hover .rowIconCredits {
-    background: rgba(74, 222, 128, 0.12);
-    transform: translateY(-1px);
-  }
-  .rowChevron { margin-left: auto; color: var(--muted); font-size: 18px; transition: transform 0.18s ease; }
-  .menuRow:hover .rowChevron { transform: translateX(3px); color: var(--green-light); }
+function closePlayDifficulty() {
+  closeModal(
+    document.getElementById("playDifficultyModal"),
+    () => mainMenu.classList.remove("hidden")
+  );
+}
 
-  .pillBtn {
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    padding: 16px 20px;
-    border-radius: 30px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid var(--panel-border);
-    background: rgba(255,255,255,0.05);
-    color: #fff;
-    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, box-shadow 0.18s ease;
-  }
-  .pillBtn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.09); }
-  .pillBtn::after {
-    content: "";
-    position: absolute;
-    inset: 0 auto 0 -130%;
-    width: 60%;
-    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.2), transparent);
-    transform: skewX(-20deg);
-    transition: left 0.55s ease;
-  }
-  .pillBtn:hover::after { left: 170%; }
-  .pillBtn:active { transform: translateY(0) scale(0.98); }
-  .pillBtn.primary {
-    background: linear-gradient(135deg, var(--green-light), var(--green));
-    border: none;
-    color: #06210f;
-    box-shadow: 0 8px 24px rgba(34, 197, 94, 0.35);
-  }
-  .pillBtn.primary:hover { box-shadow: 0 10px 28px rgba(34, 197, 94, 0.5); }
-  .pillBtn.danger { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.35); color: #fca5a5; }
-  .menuIcon { width: 20px; height: 20px; flex: 0 0 20px; transition: transform 0.25s ease; }
-  .pillBtn:hover .menuIcon { transform: scale(1.12) rotate(-6deg); }
-  .menuIcon path, .menuIcon rect, .menuIcon circle { stroke: currentColor; }
-  body.menu-open .cornerPanel,
-  body.menu-open .iconButtonsTopRight { display: none; }
+function chooseDifficultyAndPlay(level) {
+  setDifficulty(level);
 
-  /* ===== In-arena overlays ===== */
-  .arenaOverlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    background: rgba(5, 8, 15, 0.6);
-    border-radius: 16px;
-    z-index: 10;
-    pointer-events: none;
-  }
-  .arenaOverlay.interactive { pointer-events: auto; }
-  #countdownText {
-    font-size: 64px;
-    font-weight: 800;
-    color: var(--green-light);
-    text-shadow: 0 0 24px var(--green-glow);
-  }
-  .popAnim { animation: countPop 0.6s ease; }
-  @keyframes countPop {
-    0% { transform: scale(0.3); opacity: 0; }
-    40% { transform: scale(1.15); opacity: 1; }
-    70% { transform: scale(0.95); }
-    100% { transform: scale(1); opacity: 1; }
-  }
+  closeModal(
+    document.getElementById("playDifficultyModal"),
+    startGame
+  );
+}
 
-  /* ===== Modals (settings & leaderboard) ===== */
-  .modalBackdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(4,6,12,0.74);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-    backdrop-filter: blur(7px);
-    animation: backdropIn 0.28s ease-out both;
-  }
-  @keyframes backdropIn { from { opacity: 0; } to { opacity: 1; } }
-  .modalBackdrop.modalClosing { animation: backdropOut 0.24s ease-in both; }
-  .modalBackdrop.modalClosing .modalCard { animation: modalOut 0.24s cubic-bezier(0.4, 0, 1, 1) both; }
-  @keyframes backdropOut { from { opacity: 1; } to { opacity: 0; } }
-  @keyframes modalOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(10px) scale(0.96); } }
-  .modalCard {
-    background: rgba(18, 26, 43, 0.82);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 24px;
-    padding: 30px 32px;
-    width: 90%;
-    max-width: 340px;
-    text-align: center;
-    box-shadow: 0 20px 55px rgba(0,0,0,0.3);
-    backdrop-filter: blur(18px);
-    animation: modalLift 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  @keyframes modalLift {
-    from { opacity: 0; transform: translateY(12px) scale(0.97); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  .modalCard h3 { margin: 0 0 18px; font-size: 19px; letter-spacing: 0.06em; font-weight: 700; }
-  .diffRow { display: flex; gap: 8px; justify-content: center; margin-bottom: 22px; }
-  .diffBtn {
-    padding: 9px 18px;
-    border-radius: 16px;
-    font-size: 13px;
-    font-weight: 700;
-    border: 1px solid var(--panel-border);
-    background: rgba(255,255,255,0.05);
-    color: #ddd;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  .diffBtn.active[data-diff="easy"] { background: var(--green); border-color: var(--green); color: #06210f; }
-  .diffBtn.active[data-diff="normal"] { background: #ffb300; border-color: #ffb300; color: #1e1e2f; }
-  .diffBtn.active[data-diff="hard"] { background: var(--danger); border-color: var(--danger); color: #fff; }
-  .featureIcon { width: 20px; height: 20px; flex: 0 0 20px; }
-  .featureIcon path, .featureIcon circle, .featureIcon rect { stroke: currentColor; }
-  .sectionLabel { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; text-align: left; margin: 0 0 8px; }
-  .sectionIcon { width: 18px; height: 18px; color: var(--green-light); }
-  .sectionIcon path, .sectionIcon circle, .sectionIcon rect { stroke: currentColor; }
-  .miniIcon { width: 16px; height: 16px; vertical-align: -3px; margin-right: 5px; }
-  .miniIcon path, .miniIcon rect { stroke: currentColor; }
+// ===== Settings & Leaderboard =====
+function openSettings() {
+  openModal(settingsModal);
+  syncSoundToggleUI();
+  syncDeviceSwitchUI();
 
-  .settingsRow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 18px;
-    padding: 4px 2px;
-  }
-  .settingsRowLabel { font-size: 14px; color: #eee; text-align: left; }
-  .switchToggle {
-    position: relative;
-    width: 48px;
-    height: 26px;
-    border-radius: 14px;
-    background: rgba(255,255,255,0.15);
-    border: 1px solid var(--panel-border);
-    cursor: pointer;
-    transition: background 0.2s ease;
-    flex-shrink: 0;
-  }
-  .switchToggle.on { background: var(--green); border-color: var(--green); }
-  .switchToggle .knob {
-    position: absolute;
-    top: 2px; left: 2px;
-    width: 20px; height: 20px;
-    border-radius: 50%;
-    background: #fff;
-    transition: transform 0.2s ease;
-  }
-  .switchToggle.on .knob { transform: translateX(22px); }
-  .deviceSwitchRow { display: flex; gap: 8px; }
-  .deviceSwitchBtn {
-    flex: 1;
-    padding: 9px 10px;
-    border-radius: 14px;
-    font-size: 13px;
-    font-weight: 600;
-    border: 1px solid var(--panel-border);
-    background: rgba(255,255,255,0.05);
-    color: #ddd;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .deviceSwitchBtn.active {
-    background: rgba(34,197,94,0.18);
-    border-color: var(--green);
-    color: var(--green-light);
-  }
-  .leaderboardValue {
-    font-size: 40px;
-    font-weight: 800;
-    color: #ffd54f;
-    margin: 10px 0 22px;
-  }
+  if (isPlaying) pauseGame();
+}
 
-  /* ===== Toast ===== */
-  #achievementToast {
-    position: fixed;
-    top: 90px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-20px);
-    background: linear-gradient(135deg, #ffd54f, #ffb300);
-    color: #3a2a00;
-    font-weight: 700;
-    font-size: 14px;
-    padding: 12px 22px;
-    border-radius: 20px;
-    box-shadow: 0 8px 24px rgba(255, 179, 0, 0.4);
-    z-index: 60;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
-  #achievementToast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+function closeSettings() {
+  closeModal(settingsModal);
+}
 
-  /* ===== Device select ===== */
-  .deviceChoiceRow {
-    display: flex;
-    gap: 16px;
-    width: 100%;
-    max-width: 380px;
-  }
-  .deviceBtn {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    padding: 26px 16px;
-    border-radius: 20px;
-    border: 1px solid var(--panel-border);
-    background: rgba(255,255,255,0.04);
-    color: #fff;
-    cursor: pointer;
-    transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
-  }
-  .deviceBtn:hover {
-    transform: translateY(-3px);
-    background: rgba(34,197,94,0.1);
-    border-color: rgba(34,197,94,0.4);
-  }
-  .deviceBtn { animation: deviceRise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
-  .deviceBtn:nth-child(2) { animation-delay: 0.08s; }
-  .deviceBtn:hover .deviceIcon { transform: translateY(-3px) scale(1.08); }
-  .deviceIcon { transition: transform 0.25s ease; }
-  @keyframes deviceRise {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  #controlsHint, #swipeHint, .bestScorePanel {
-    background: rgba(18, 26, 43, 0.76);
-    backdrop-filter: blur(14px);
-  }
-  .deviceBtn .deviceIcon { width: 38px; height: 38px; color: var(--green-light); }
-  .deviceBtn .deviceIcon svg { width: 100%; height: 100%; }
-  .deviceBtn .deviceLabel { font-weight: 700; font-size: 15px; }
-  .deviceBtn .deviceDesc { font-size: 12px; color: var(--muted); }
+gearBtn.addEventListener("click", openSettings);
 
-  /* ===== Swipe hint (mobile) ===== */
-  #swipeHint {
-    position: fixed;
-    left: 50%;
-    bottom: 30px;
-    transform: translateX(-50%);
-    z-index: 15;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--panel);
-    border: 1px solid var(--panel-border);
-    border-radius: 16px;
-    padding: 12px 20px;
-    color: var(--muted);
-    font-size: 13px;
-  }
-  #swipeHint .swipeIcon { width: 24px; height: 24px; display: inline-flex; animation: swipeMove 1.6s ease-in-out infinite; }
-  #swipeHint .swipeIcon svg { width: 100%; height: 100%; stroke: var(--green-light); }
-  @keyframes swipeMove {
-    0%, 100% { transform: translateX(-6px); opacity: 0.6; }
-    50% { transform: translateX(6px); opacity: 1; }
-  }
+function openLeaderboard() {
+  leaderboardValueEl.innerText = highScore;
+  openModal(leaderboardModal);
+}
 
-  /* ===== Mobile adjustments ===== */
-  body.mode-mobile canvas {
-    width: min(96vw, calc(100dvh - 210px), 520px) !important;
-    height: min(96vw, calc(100dvh - 210px), 520px) !important;
-  }
-  body.mode-mobile .bestScorePanel {
-    position: fixed !important;
-    top: max(82px, env(safe-area-inset-top)) !important;
-    bottom: auto;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    min-width: 0;
-    padding: 10px 22px;
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
-    font-size: 15px;
-  }
-  body.mode-mobile .bestScorePanel .value { font-size: 20px; margin-top: 0; }
-  body.mode-mobile .bestScorePanel .label { font-size: 14px; }
-  body.mode-mobile .cornerPanel { top: 18px; left: 18px; gap: 8px; }
-  body.mode-mobile .cornerPanel .icon { width: 24px; height: 20px; }
-  body.mode-mobile .cornerPanel .label { font-size: 13px; }
-  body.mode-mobile .cornerPanel .value { font-size: 22px; }
-  body.mode-mobile #shieldBadge { top: 66px; left: 18px; }
-  body.mode-mobile .iconButtonsTopRight { top: 18px; right: 18px; gap: 12px; }
-  body.mode-mobile .iconBtn { width: 46px; height: 46px; }
-  body.mode-mobile .iconBtn svg { width: 20px; height: 20px; }
-  body.mode-mobile .logoWrap svg { width: 108px; height: 92px; }
-  body.mode-mobile .bigTitle { font-size: 36px; }
-  body.mode-mobile .bigSubtitle { font-size: 14px; margin-bottom: 26px; }
-  body.mode-mobile .menuCard {
-    padding: 34px 24px 28px;
-    width: 94vw;
-    max-width: 440px;
-    border-radius: 28px;
-  }
-  body.mode-mobile .menuButtons { max-width: 100%; gap: 16px; }
-  body.mode-mobile .heroPlayBtn { padding: 20px 22px; font-size: 18px; border-radius: 24px; }
-  body.mode-mobile .menuRow { padding: 18px 18px; font-size: 16px; }
-  body.mode-mobile .rowIcon { width: 40px; height: 40px; flex: 0 0 40px; }
-  body.mode-mobile .rowIcon svg { width: 20px; height: 20px; }
-  body.mode-mobile .pillBtn { padding: 19px 22px; font-size: 17px; border-radius: 26px; }
-  body.mode-mobile .modalCard { width: 92vw; padding: 32px 26px; border-radius: 26px; }
-  body.mode-mobile .modalCard h3 { font-size: 21px; }
-  body.mode-mobile .diffBtn { padding: 13px 20px; font-size: 15px; }
-  body.mode-mobile .deviceBtn { padding: 30px 18px; }
-  body.mode-mobile .deviceBtn .deviceIcon { width: 44px; height: 44px; }
-  body.mode-mobile .deviceBtn .deviceLabel { font-size: 17px; }
-  body.mode-mobile .deviceBtn .deviceDesc { font-size: 13px; }
-  body.mode-mobile #swipeHint { font-size: 14px; padding: 14px 22px; bottom: 26px; }
-  body.mode-mobile #controlsHint { display: none !important; }
-  body.mode-mobile #achievementToast { font-size: 15px; padding: 14px 26px; top: 110px; }
-  body.mode-mobile .menuDivider { width: 60px; height: 4px; }
+function closeLeaderboard() {
+  closeModal(leaderboardModal);
+}
 
-  @media (max-width: 760px) and (orientation: landscape) {
-    body.mode-mobile canvas {
-      width: min(58vw, calc(100dvh - 44px), 440px) !important;
-      height: min(58vw, calc(100dvh - 44px), 440px) !important;
+function openCredits() {
+  openModal(document.getElementById("creditsModal"));
+}
+
+function closeCredits() {
+  closeModal(document.getElementById("creditsModal"));
+}
+
+// ===== Achievement toast =====
+let toastTimeoutId = null;
+
+function showToast(text) {
+  const toastEl = document.getElementById("achievementToast");
+
+  clearTimeout(toastTimeoutId);
+
+  toastEl.textContent = text;
+  toastEl.classList.add("show");
+
+  toastTimeoutId = setTimeout(
+    () => toastEl.classList.remove("show"),
+    2200
+  );
+}
+
+function checkMilestones() {
+  for (const m of milestones) {
+    if (score >= m && !achievedMilestones.has(m)) {
+      achievedMilestones.add(m);
+      showToast("🏅 Score " + m + " reached!");
+      break;
     }
-    body.mode-mobile .bestScorePanel { top: 18px !important; bottom: auto; }
-    body.mode-mobile #swipeHint { bottom: 14px; }
+  }
+}
+
+// ===== Floating popup text (combo/bonus/penalty) =====
+function spawnPopup(x, y, text, color) {
+  popups.push({
+    x,
+    y,
+    text,
+    color,
+    life: 1
+  });
+}
+
+function updateAndDrawPopups(dt) {
+  ctx.save();
+
+  ctx.font = "bold 13px Poppins, sans-serif";
+  ctx.textAlign = "center";
+
+  for (let i = popups.length - 1; i >= 0; i--) {
+    const p = popups[i];
+
+    p.y -= dt * 0.03;
+    p.life -= dt * 0.0016;
+
+    if (p.life <= 0) {
+      popups.splice(i, 1);
+      continue;
+    }
+
+    ctx.globalAlpha = Math.max(p.life, 0);
+    ctx.fillStyle = p.color;
+    ctx.fillText(p.text, p.x, p.y);
   }
 
-  /* ===== Desktop polish ===== */
-  @media (min-width: 900px) {
-    .menuCard { max-width: 400px; padding: 50px 40px 40px; }
-    .bigTitle { font-size: 50px; }
+  ctx.restore();
+  ctx.globalAlpha = 1;
+}
+
+function setDifficulty(level) {
+  difficulty = level;
+
+  const arenaThemes = {
+    easy: {
+      border: "rgba(34, 197, 94, 0.7)",
+      glow: "rgba(34, 197, 94, 0.18)"
+    },
+    normal: {
+      border: "rgba(255, 179, 0, 0.72)",
+      glow: "rgba(255, 179, 0, 0.18)"
+    },
+    hard: {
+      border: "rgba(239, 68, 68, 0.72)",
+      glow: "rgba(239, 68, 68, 0.2)"
+    }
+  };
+
+  const theme = arenaThemes[level];
+
+  document.documentElement.style.setProperty(
+    "--arena-border",
+    theme.border
+  );
+
+  document.documentElement.style.setProperty(
+    "--arena-glow",
+    theme.glow
+  );
+
+  document.querySelectorAll(".diffBtn").forEach(btn => {
+    btn.classList.toggle(
+      "active",
+      btn.dataset.diff === level
+    );
+  });
+}
+
+function updateScoreDisplays() {
+  if (menuOpen) {
+    cornerLabel.innerText = "High Score";
+    cornerValue.innerText = highScore;
+  } else {
+    cornerLabel.innerText = "Score";
+    cornerValue.innerText = score || 0;
   }
+
+  bestScoreValue.innerText = highScore;
+}
+
+function hideFullScreens() {
+  mainMenu.classList.add("hidden");
+  gameOverScreen.classList.add("hidden");
+  countdownOverlay.style.display = "none";
+  pauseOverlay.classList.add("hidden");
+}
+
+function showMainMenu() {
+  isPlaying = false;
+  isPaused = false;
+  menuOpen = true;
+
+  document.body.classList.add("menu-open");
+
+  countdownGen++;
+  isCountdownActive = false;
+
+  clearTimeout(countdownTimeoutId);
+  clearTimeout(swipeHintTimeoutId);
+  clearInterval(moveTimer);
+
+  hideFullScreens();
+
+  settingsModal.classList.add("hidden");
+  leaderboardModal.classList.add("hidden");
+
+  mainMenu.classList.remove("hidden");
+
+  bestScorePanel.classList.add("hidden");
+  controlsHint.classList.add("hidden");
+  swipeHint.classList.add("hidden");
+  pauseBtn.classList.add("hidden");
+  soundBtn.classList.remove("hidden");
+  shieldBadge.classList.add("hidden");
+
+  document.getElementById("gameWrapper").style.visibility = "hidden";
+
+  updateScoreDisplays();
+}
+
+function startGame() {
+  settingsModal.classList.add("hidden");
+  hideFullScreens();
+
+  menuOpen = false;
+  document.body.classList.remove("menu-open");
+
+  bestScorePanel.classList.remove("hidden");
+  pauseBtn.classList.remove("hidden");
+  soundBtn.classList.add("hidden");
+
+  pauseIcon.classList.remove("hidden");
+  resumeIcon.classList.add("hidden");
+
+  if (deviceMode === "mobile") {
+    swipeHint.classList.add("hidden");
+    controlsHint.classList.add("hidden");
+  } else {
+    controlsHint.classList.remove("hidden");
+    swipeHint.classList.add("hidden");
+  }
+
+  const gameWrapperEl = document.getElementById("gameWrapper");
+
+  gameWrapperEl.style.visibility = "visible";
+  gameWrapperEl.classList.remove("gameOverExit");
+  gameWrapperEl.classList.remove("startPop");
+  void gameWrapperEl.offsetWidth;
+  gameWrapperEl.classList.add("startPop");
+
+  const sweepEl = document.getElementById("arenaSweep");
+
+  sweepEl.classList.remove("playSweep");
+  void sweepEl.offsetWidth;
+  sweepEl.classList.add("playSweep");
+
+  snake = [{ x: 9 * box, y: 9 * box }];
+  prevSnake = [{ x: 9 * box, y: 9 * box }];
+  direction = null;
+  score = 0;
+
+  particles = [];
+  popups = [];
+  comboCount = 0;
+  lastEatTime = 0;
+
+  achievedMilestones.clear();
+
+  shieldActive = false;
+  shieldUntil = 0;
+
+  shieldBadge.classList.add("hidden");
+  canvas.classList.remove("shielded");
+
+  hazard = null;
+  nextHazardAt =
+    performance.now() + 5000 + Math.random() * 3000;
+
+  currentSpeed = speedMap[difficulty];
+
+  updateScoreDisplays();
+  spawnFood();
+
+  clearInterval(moveTimer);
+
+  isPlaying = false;
+  isPaused = false;
+
+  runCountdown(() => {
+    lastTickTime = performance.now();
+    moveTimer = setInterval(tick, currentSpeed);
+    isPlaying = true;
+
+    if (deviceMode === "mobile") {
+      showSwipeHintTemporarily();
+    }
+  });
+
+  if (!renderLoopId) {
+    renderLoopId = requestAnimationFrame(renderLoop);
+  }
+}

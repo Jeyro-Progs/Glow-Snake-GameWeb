@@ -58,12 +58,6 @@
     z-index: 1;
     filter: blur(1px);
   }
-  .decorSquare1 { top: 19%; left: 4%; width: 70px; height: 70px; }
-  .decorSquare2 { top: 25%; left: 8%; width: 90px; height: 90px; background: rgba(76, 175, 80, 0.09); }
-  .decorSquare3 { top: 58%; right: 8%; width: 70px; height: 70px; }
-  .decorDot1 { top: 37%; left: 6%; }
-  .decorDot2 { top: 83%; left: 13%; }
-  .decorDot3 { top: 72%; right: 11%; }
   .floatParticle {
     position: fixed;
     bottom: -30px;
@@ -366,11 +360,6 @@
   }
   .bigSubtitle .dot { margin: 0 10px; opacity: 0.6; }
 
-  /* ===== Game Over screen ===== */
-  .gameOverTitle { font-size: 42px; -webkit-text-fill-color: #ff6b6b; background: none; }
-  .scoreLabel { color: var(--muted); margin-bottom: 4px; }
-  .newRecordLabel { color: #ffd54f; font-weight: bold; margin-bottom: 18px; }
-
   .menuButtons {
     display: flex;
     flex-direction: column;
@@ -384,8 +373,6 @@
   .menuButtons .pillBtn:nth-child(1) { animation-delay: 0.3s; }
   .menuButtons .pillBtn:nth-child(2) { animation-delay: 0.38s; }
   .menuButtons .pillBtn:nth-child(3) { animation-delay: 0.46s; }
-  .menuButtonsNarrow { max-width: 220px; }
-  .menuButtonsFull { max-width: 100%; }
 
   /* ===== Modern minimalist menu card ===== */
   .menuCard {
@@ -565,7 +552,6 @@
     pointer-events: none;
   }
   .arenaOverlay.interactive { pointer-events: auto; }
-  .pauseTitle { margin-bottom: 20px; letter-spacing: 0.15em; }
   #countdownText {
     font-size: 64px;
     font-weight: 800;
@@ -629,9 +615,6 @@
   .diffBtn.active[data-diff="easy"] { background: var(--green); border-color: var(--green); color: #06210f; }
   .diffBtn.active[data-diff="normal"] { background: #ffb300; border-color: #ffb300; color: #1e1e2f; }
   .diffBtn.active[data-diff="hard"] { background: var(--danger); border-color: var(--danger); color: #fff; }
-  .difficultyBtnNormal { background: linear-gradient(135deg, #ffd54f, #ffb300); border: none; color: #3a2a00; }
-  .difficultyBtnHard { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.4); color: #fca5a5; }
-  .difficultyBtnCancel { margin-top: 10px; background: transparent; border-color: transparent; color: var(--muted); }
   .featureIcon { width: 20px; height: 20px; flex: 0 0 20px; }
   .featureIcon path, .featureIcon circle, .featureIcon rect { stroke: currentColor; }
   .sectionLabel { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; text-align: left; margin: 0 0 8px; }
@@ -669,7 +652,7 @@
     transition: transform 0.2s ease;
   }
   .switchToggle.on .knob { transform: translateX(22px); }
-  .deviceSwitchRow { display: flex; gap: 8px; margin-bottom: 22px; }
+  .deviceSwitchRow { display: flex; gap: 8px; }
   .deviceSwitchBtn {
     flex: 1;
     padding: 9px 10px;
@@ -697,14 +680,6 @@
     margin: 10px 0 22px;
   }
 
-  /* ===== Credits modal ===== */
-  .creditsName { color: #fff; font-weight: 700; font-size: 16px; margin: 0 0 2px; }
-  .creditsHandle { color: var(--green-light); font-size: 13px; margin: 0 0 14px; }
-  .creditsRole { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 0 0 4px; }
-  .creditsRoleLast { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 0 0 18px; }
-  .creditsDivider { margin: 0 auto 16px; }
-  .creditsFooter { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 0 0 20px; }
-
   /* ===== Toast ===== */
   #achievementToast {
     position: fixed;
@@ -729,8 +704,6 @@
   }
 
   /* ===== Device select ===== */
-  .deviceSelectTitle { font-size: 32px; }
-  .deviceSelectSubtitle { margin-bottom: 26px; }
   .deviceChoiceRow {
     display: flex;
     gap: 16px;

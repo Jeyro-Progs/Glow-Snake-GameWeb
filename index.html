@@ -17,12 +17,12 @@
 <div class="auroraBlob" id="auroraCyan"></div>
 
 <!-- Decorative shapes -->
-<div class="decorSquare" style="top:19%; left:4%; width:70px; height:70px;"></div>
-<div class="decorSquare" style="top:25%; left:8%; width:90px; height:90px; background: rgba(76,175,80,0.09);"></div>
-<div class="decorDot" style="top:37%; left:6%;"></div>
-<div class="decorDot" style="top:83%; left:13%;"></div>
-<div class="decorSquare" style="top:58%; right:8%; width:70px; height:70px;"></div>
-<div class="decorDot" style="top:72%; right:11%;"></div>
+<div class="decorSquare decorSquare1"></div>
+<div class="decorSquare decorSquare2"></div>
+<div class="decorDot decorDot1"></div>
+<div class="decorDot decorDot2"></div>
+<div class="decorSquare decorSquare3"></div>
+<div class="decorDot decorDot3"></div>
 
 <!-- Achievement toast -->
 <div id="achievementToast"></div>
@@ -68,8 +68,8 @@
 
     <!-- Pause overlay -->
     <div id="pauseOverlay" class="arenaOverlay interactive hidden">
-      <h2 style="margin-bottom:20px; letter-spacing:0.15em;">PAUSED</h2>
-      <div class="menuButtons" style="max-width:220px;">
+      <h2 class="pauseTitle">PAUSED</h2>
+      <div class="menuButtons menuButtonsNarrow">
         <button class="pillBtn primary" onclick="resumeGame()">▶ Resume</button>
         <button class="pillBtn danger" onclick="showMainMenu()">Main Menu</button>
       </div>
@@ -105,9 +105,9 @@
 <!-- Device select -->
 <div id="deviceSelect" class="fullScreenView">
   <div class="menuCard">
-    <h1 class="bigTitle" style="font-size:32px;">Choose Your Device</h1>
+    <h1 class="bigTitle deviceSelectTitle">Choose Your Device</h1>
     <div class="menuDivider"></div>
-    <div class="bigSubtitle" style="margin-bottom:26px;">Adjust controls &amp; display for your device</div>
+    <div class="bigSubtitle deviceSelectSubtitle">Adjust controls &amp; display for your device</div>
     <div class="deviceChoiceRow">
       <button class="deviceBtn" onclick="selectDevice('mobile')">
         <span class="deviceIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="6.5" y="2.5" width="11" height="19" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M10 18.5h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
@@ -191,10 +191,10 @@
 
 <!-- Game Over screen -->
 <div id="gameOverScreen" class="fullScreenView hidden">
-  <h1 class="bigTitle" style="font-size:42px; -webkit-text-fill-color:#ff6b6b; background:none;">GAME OVER</h1>
-  <p style="color:var(--muted); margin-bottom:4px;">Score</p>
+  <h1 class="bigTitle gameOverTitle">GAME OVER</h1>
+  <p class="scoreLabel">Score</p>
   <div class="leaderboardValue" id="finalScore">0</div>
-  <p id="newRecordText" class="hidden" style="color:#ffd54f; font-weight:bold; margin-bottom:18px;">NEW RECORD!</p>
+  <p id="newRecordText" class="hidden newRecordLabel">NEW RECORD!</p>
   <div class="menuButtons">
     <button class="pillBtn primary" onclick="openPlayDifficulty()">Play Again</button>
     <button class="pillBtn" onclick="showMainMenu()">Main Menu</button>
@@ -205,12 +205,12 @@
 <div id="playDifficultyModal" class="modalBackdrop hidden">
   <div class="modalCard">
     <h3>SELECT DIFFICULTY</h3>
-    <div class="menuButtons" style="max-width:100%;">
+    <div class="menuButtons menuButtonsFull">
       <button class="pillBtn primary" onclick="chooseDifficultyAndPlay('easy')"><svg class="featureIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke-width="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3m-2.9-7.1-2.1 2.1M6 18l-2.1 2.1m0-15.2L6 6.9m12 12 2.1 2.1" stroke-width="2" stroke-linecap="round"/></svg>Easy</button>
-      <button class="pillBtn" style="background:linear-gradient(135deg,#ffd54f,#ffb300); border:none; color:#3a2a00;" onclick="chooseDifficultyAndPlay('normal')"><svg class="featureIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v9l6 3" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="8.5" stroke-width="2"/></svg>Normal</button>
-      <button class="pillBtn" style="background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.4); color:#fca5a5;" onclick="chooseDifficultyAndPlay('hard')"><svg class="featureIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 4 19h16L12 3Z" stroke-width="2" stroke-linejoin="round"/><path d="M12 9v4m0 3h.01" stroke-width="2" stroke-linecap="round"/></svg>Hard</button>
+      <button class="pillBtn difficultyBtnNormal" onclick="chooseDifficultyAndPlay('normal')"><svg class="featureIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v9l6 3" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="8.5" stroke-width="2"/></svg>Normal</button>
+      <button class="pillBtn difficultyBtnHard" onclick="chooseDifficultyAndPlay('hard')"><svg class="featureIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 4 19h16L12 3Z" stroke-width="2" stroke-linejoin="round"/><path d="M12 9v4m0 3h.01" stroke-width="2" stroke-linecap="round"/></svg>Hard</button>
     </div>
-    <button class="pillBtn" style="margin-top:10px; background:transparent; border-color:transparent; color:var(--muted);" onclick="closePlayDifficulty()">Cancel</button>
+    <button class="pillBtn difficultyBtnCancel" onclick="closePlayDifficulty()">Cancel</button>
   </div>
 </div>
 
@@ -225,7 +225,7 @@
     </div>
 
     <p class="sectionLabel"><svg class="sectionIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="2" stroke-width="2"/><path d="M9 20h6m-3-4v4" stroke-width="2" stroke-linecap="round"/></svg>Device Type</p>
-    <div class="deviceSwitchRow" style="margin-bottom:22px;">
+    <div class="deviceSwitchRow">
       <button class="deviceSwitchBtn" id="deviceSwitchMobile" onclick="switchDeviceInline('mobile')"><svg class="miniIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2" stroke-width="1.8"/><path d="M10 18.5h4" stroke-width="1.8" stroke-linecap="round"/></svg>Mobile</button>
       <button class="deviceSwitchBtn" id="deviceSwitchPc" onclick="switchDeviceInline('pc')"><svg class="miniIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" stroke-width="1.8"/><path d="M9 21h6m-3-5v5" stroke-width="1.8" stroke-linecap="round"/></svg>PC</button>
     </div>
@@ -247,12 +247,12 @@
 <div id="creditsModal" class="modalBackdrop hidden">
   <div class="modalCard">
     <h3>CREDITS</h3>
-    <p style="color:#fff; font-weight:700; font-size:16px; margin:0 0 2px;">by Jeyro-Progs</p>
-    <p style="color:var(--green-light); font-size:13px; margin:0 0 14px;">AKA Jeykhan Ramadhan</p>
-    <p style="color:var(--muted); font-size:13px; line-height:1.6; margin:0 0 4px;">Student at SMPN 7 Tambun Selatan</p>
-    <p style="color:var(--muted); font-size:13px; line-height:1.6; margin:0 0 18px;">Semi-Professional Software Engineer</p>
-    <div class="menuDivider" style="margin:0 auto 16px;"></div>
-    <p style="color:var(--muted); font-size:12px; line-height:1.6; margin:0 0 20px;">Built with HTML, CSS &amp; JavaScript.<br>Thanks for playing!</p>
+    <p class="creditsName">by Jeyro-Progs</p>
+    <p class="creditsHandle">AKA Jeykhan Ramadhan</p>
+    <p class="creditsRole">Student at SMPN 7 Tambun Selatan</p>
+    <p class="creditsRoleLast">Semi-Professional Software Engineer</p>
+    <div class="menuDivider creditsDivider"></div>
+    <p class="creditsFooter">Built with HTML, CSS &amp; JavaScript.<br>Thanks for playing!</p>
     <button class="pillBtn" onclick="closeCredits()">Close</button>
   </div>
 </div>
